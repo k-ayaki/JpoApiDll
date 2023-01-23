@@ -63,8 +63,11 @@
     <Compile Include="AppProgressSimple.cs" />
     <Compile Include="CaseNumberReference.cs" />
     <Compile Include="CiteDocInfo.cs" />
+    <Compile Include="ConvertXml2Word.cs" />
+    <Compile Include="ConvertWord.cs" />
     <Compile Include="DivisionalAppInfo.cs" />
     <Compile Include="Html2Word.cs" />
+    <Compile Include="InpitRss.cs" />
     <Compile Include="JpoHttp.cs" />
     <Compile Include="NetworkState.cs" />
     <Compile Include="PriorityRightAppInfo.cs" />

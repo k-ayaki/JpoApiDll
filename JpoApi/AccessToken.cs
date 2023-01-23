@@ -11,29 +11,13 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Web;
 using System.Security.Cryptography;
+using JpoApi.Properties;
 
 namespace JpoApi
 {
     public class AccessToken : IDisposable
     {
-        public CAccessToken m_access_token 
-        { 
-            get
-            {
-                TimeSpan elapsedSpan = new TimeSpan(DateTime.Now.Ticks - dt.Ticks);
-                if (elapsedSpan.Seconds >= 300)
-                {
-                    getAC();
-                }
-                return _m_access_token;
-            }
-            set
-            {
-                _m_access_token = value;
-            }
-
-        }
-        public CAccessToken _m_access_token;
+        public CAccessToken m_access_token { get; set; }
         public class CAccessToken
         {
             public string access_token { get; set; }
@@ -47,18 +31,25 @@ namespace JpoApi
 
         private string m_id;
         private string m_password;
-        private string m_authPath;
+        private string m_authFullPath;
 
         private DateTime dt;
         public AccessToken(string aId, string aPassword, string a_authPath)
         {
             m_id = aId;
             m_password = aPassword;
-            m_authPath = a_authPath;
-            getAC();
+            if (a_authPath.IndexOf("https://") >= 0)
+            {
+                m_authFullPath = a_authPath;
+            }
+            else
+            {
+                m_authFullPath = Settings.Default.at_url + a_authPath;
+            }
+            get();
         }
 
-        private void getAC()
+        public void get()
         {
             //文字コードを指定する
             System.Text.Encoding enc = System.Text.Encoding.GetEncoding("UTF-8");
@@ -71,18 +62,26 @@ namespace JpoApi
             {
                 //バイト型配列に変換
                 byte[] postDataBytes = System.Text.Encoding.ASCII.GetBytes(postData);
-                jpoHttp.post(Properties.Settings.Default.at_url + m_authPath, postDataBytes);
+                jpoHttp.post(m_authFullPath, postDataBytes);
                 if (jpoHttp.m_error == jpoHttp.e_NONE)
                 {
                     dt = DateTime.Now;
-                    _m_access_token = JsonConvert.DeserializeObject<CAccessToken>(jpoHttp.m_json);
+                    m_access_token = JsonConvert.DeserializeObject<CAccessToken>(jpoHttp.m_json);
                 }
                 else
                 {
                     dt = DateTime.Now.AddHours(-1);
-                    _m_access_token = JsonConvert.DeserializeObject<CAccessToken>(m_default_json);
+                    m_access_token = JsonConvert.DeserializeObject<CAccessToken>(m_default_json);
                 }
                 jpoHttp.Dispose();
+            }
+        }
+        public void refresh()
+        {
+            TimeSpan elapsedSpan = new TimeSpan(DateTime.Now.Ticks - dt.Ticks);
+            if (elapsedSpan.Seconds > 300)
+            {
+                get();
             }
         }
 

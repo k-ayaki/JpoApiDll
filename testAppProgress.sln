@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testAppDocContOpinionAmendm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetAccount", "SetAccount\SetAccount.csproj", "{A615CDD8-3EF7-44B5-8142-CB41986204F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testInpitRss", "testInpitRss\testInpitRss.csproj", "{21C9D1D7-98D6-4E69-B590-471B9FBE1CCC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{A615CDD8-3EF7-44B5-8142-CB41986204F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A615CDD8-3EF7-44B5-8142-CB41986204F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A615CDD8-3EF7-44B5-8142-CB41986204F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21C9D1D7-98D6-4E69-B590-471B9FBE1CCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21C9D1D7-98D6-4E69-B590-471B9FBE1CCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21C9D1D7-98D6-4E69-B590-471B9FBE1CCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21C9D1D7-98D6-4E69-B590-471B9FBE1CCC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -57,7 +57,17 @@ namespace JpoApi
                 m_zipFile = cacheDir + @"\" + requestNumber + ".zip";
                 m_jsonFile = cacheDir + @"\" + requestNumber + ".json";
                 m_extraPath = cacheDir + @"\" + requestNumber;
+                if (isCache() == e_CONTENT)
+                {
+                    return;
+                }
+                readCache();
+                if (m_error == e_NONE || m_error == e_CONTENT)
+                {
+                    return;
+                }
 
+                /*
                 if (File.Exists(m_jsonFile))
                 {
                     System.IO.FileInfo fi = new System.IO.FileInfo(m_jsonFile);
@@ -96,11 +106,13 @@ namespace JpoApi
                         }
                     }
                 }
+                */
             }
             catch (Exception ex)
             {
                 //Console.WriteLine(ex.ToString());
             }
+            /*
             try
             {
                 if (File.Exists(m_zipFile))
@@ -135,6 +147,9 @@ namespace JpoApi
             {
                 //Console.WriteLine(ex.ToString());
             }
+            */
+            read(requestNumber, a_access_token);
+            /*
             using (JpoHttp jpo = new JpoHttp())
             {
                 NetworkState networkState = new NetworkState();
@@ -193,8 +208,166 @@ namespace JpoApi
 
                 }
             }
+            */
+        }
+        // キャッシュの存在チェック
+        private int isCache()
+        {
+            try
+            {
+                m_error = e_NONE;
+
+                if (File.Exists(m_jsonFile))
+                {
+                    System.IO.FileInfo fi = new System.IO.FileInfo(m_jsonFile);
+                    DateTime dt = DateTime.Now;
+                    Account ac = new Account();
+                    if (dt.AddDays(-ac.m_cacheEffective).Date <= fi.LastWriteTime.Date)
+                    {
+                        using (JpoHttp jpo = new JpoHttp())
+                        {
+                            jpo.m_json = File.ReadAllText(m_jsonFile);
+                            CAppDocContRefusalReasonDecision applicant = JsonConvert.DeserializeObject<CAppDocContRefusalReasonDecision>(jpo.m_json);
+                            m_result = applicant.result;
+                            switch (m_result.statusCode)
+                            {
+                                case "107": // 該当するデータがありません。
+                                case "108": // 該当する書類実体がありません。
+                                case "111": // 提供対象外の案件番号のため取得できませんでした。
+                                case "204": // パラメーターの入力された値に問題があります。
+                                case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
+                                case "301": // 指定された特許情報取得APIのURLは存在しません。
+                                    m_error = e_CONTENT;
+                                    break;
+                                case "203": // 1日のアクセス上限を超過したため閲覧を制限します。
+                                case "210": // 無効なトークンです。
+                                case "212": // 無効な認証情報です。
+                                case "302": // 処理が時間内に終了しないため、タイムアウトになりました。
+                                case "303": // アクセスが集中しています。
+                                case "400": // 無効なリクエストです。
+                                case "999": // 想定外のエラーが発生しました。
+                                default:
+                                    // jsonファイルを削除
+                                    if (File.Exists(m_jsonFile))
+                                        System.IO.File.Delete(m_jsonFile);
+                                    break;
+                            }
+                        }
+                    }
+                }
+                return m_error;
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine(ex.ToString());
+                m_error = e_CACHE;
+                return m_error;
+
+            }
+        }
+        // キャッシュの読み込み
+        private int readCache()
+        {
+            try
+            {
+                if (File.Exists(m_zipFile))
+                {
+                    System.IO.FileInfo fi = new System.IO.FileInfo(m_zipFile);
+                    DateTime dt = DateTime.Now;
+                    Account ac = new Account();
+                    if (dt.AddDays(-ac.m_cacheEffective).Date <= fi.LastWriteTime.Date)
+                    {
+                        // 同名の展開パスが有れば前もって削除
+                        if (System.IO.Directory.Exists(m_extraPath))
+                        {
+                            //System.IO.Directory.Delete(m_extraPath, true);
+                        }
+                        else
+                        {
+                            System.IO.Compression.ZipFile.ExtractToDirectory(m_zipFile, m_extraPath, System.Text.Encoding.GetEncoding("shift_jis"));
+                        }
+                        m_files = System.IO.Directory.EnumerateFiles(m_extraPath, "*.xml", System.IO.SearchOption.AllDirectories);
+                        if (m_files == null)
+                        {
+                            m_error = e_CACHE;
+                        }
+                        else
+                        {
+                            m_error = e_NONE;
+                        }
+                        return m_error;
+                    }
+                }
+                m_error = e_CACHE;
+                return m_error;
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine(ex.ToString());
+                m_error = e_CACHE;
+                return m_error;
+            }
         }
 
+        private void read(string requestNumber, string a_access_token)
+        {
+            using (JpoHttp jpo = new JpoHttp())
+            {
+                NetworkState networkState = new NetworkState();
+                while (DateTime.Now.Second % 6 != networkState.m_i64macaddress % 6)
+                {
+                    System.Threading.Thread.Sleep(100);
+                }
+
+                jpo.get(Properties.Settings.Default.url + @"/app_doc_cont_refusal_reason_decision/" + requestNumber, a_access_token);
+                while (DateTime.Now.Second % 6 == networkState.m_i64macaddress % 6)
+                {
+                    System.Threading.Thread.Sleep(100);
+                }
+                if (jpo.m_error == jpo.e_NONE)
+                {
+                    try
+                    {
+                        CAppDocContRefusalReasonDecision applicant = JsonConvert.DeserializeObject<CAppDocContRefusalReasonDecision>(jpo.m_json);
+                        m_result = applicant.result;
+                        File.WriteAllText(m_jsonFile, jpo.m_json);
+                        if (System.IO.Directory.Exists(m_jsonFile))
+                            System.IO.Directory.Delete(m_extraPath, true);
+                        m_error = e_CONTENT;
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        //Console.WriteLine(ex.ToString());
+                    }
+                    try
+                    {
+                        File.WriteAllBytes(m_zipFile, jpo.m_content);
+                        if (System.IO.Directory.Exists(m_extraPath))
+                            System.IO.Directory.Delete(m_extraPath, true);
+
+
+                        System.IO.Compression.ZipFile.ExtractToDirectory(m_zipFile, m_extraPath, System.Text.Encoding.GetEncoding("shift_jis"));
+                        m_files = System.IO.Directory.EnumerateFiles(m_extraPath, "*.xml", System.IO.SearchOption.AllDirectories);
+                        if (m_files == null)
+                        {
+                            m_error = e_CACHE;
+                        }
+                        else
+                        {
+                            m_error = e_NONE;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        m_error = e_CACHE;
+                    }
+                    // jsonファイルを削除
+                    if (File.Exists(m_jsonFile))
+                        System.IO.File.Delete(m_jsonFile);
+                }
+            }
+        }
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)

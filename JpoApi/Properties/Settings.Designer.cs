@@ -82,5 +82,17 @@ namespace JpoApi.Properties {
                 this["at_url"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://www.j-platpat.inpit.go.jp/cache/rss")]
+        public string rss_url {
+            get {
+                return ((string)(this["rss_url"]));
+            }
+            set {
+                this["rss_url"] = value;
+            }
+        }
     }
 }

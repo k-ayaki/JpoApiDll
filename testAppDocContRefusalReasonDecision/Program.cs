@@ -15,7 +15,7 @@ namespace testAppDocContRefusalReasonDecision
             AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path);
 
             Console.WriteLine("■拒絶理由通知実体情報取得");
-            string[] docNumbers = { "2013250562", "2010013051", "2006106644", "2014089742" };
+            string[] docNumbers = { "2017157494", "2013250562", "2010013051", "2006106644", "2014089742" };
             foreach(string docNumber in docNumbers)
             {
                 AppDocContRefusalReasonDecision tj5 = new AppDocContRefusalReasonDecision(docNumber, at.m_access_token.access_token);

@@ -17,5 +17,8 @@
     <Setting Name="at_url" Type="System.String" Scope="User">
       <Value Profile="(Default)">https://ip-data.jpo.go.jp</Value>
     </Setting>
+    <Setting Name="rss_url" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://www.j-platpat.inpit.go.jp/cache/rss</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

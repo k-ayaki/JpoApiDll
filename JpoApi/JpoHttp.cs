@@ -30,12 +30,14 @@ namespace JpoApi
         public byte[] m_buf = new byte[8192];
         public string m_json;
         public byte[] m_content = new byte[0];
+        public int m_statusCode;
         public JpoHttp()
         {
+            m_statusCode = 0;
             m_error = e_NONE;
             m_json = "";
         }
-        public void get(string a_url, string accessToken)
+        public void get(string a_url, string accessToken = "")
         {
             try
             {
@@ -43,11 +45,15 @@ namespace JpoApi
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(a_url);
                 req.Method = "GET";
-                req.Headers.Add("Authorization", "Bearer " + accessToken);
+                if(accessToken.Length > 0)
+                {
+                    req.Headers.Add("Authorization", "Bearer " + accessToken);
+                }
                 req.UserAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36";
                 //サーバーからの応答を受信するためのHttpWebResponseを取得
                 using (HttpWebResponse res = (HttpWebResponse)req.GetResponse())
                 {
+                    m_statusCode = (int)res.StatusCode;
                     //応答データを受信するためのStreamを取得
                     using (Stream st = res.GetResponseStream())
                     {
