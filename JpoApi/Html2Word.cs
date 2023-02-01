@@ -8,66 +8,143 @@ using Microsoft.Office.Interop.Word;
 using Word = Microsoft.Office.Interop.Word;
 using System.Xml.Linq;
 using System.IO.Compression;
+using System.Drawing.Printing;
+using DocumentFormat.OpenXml.Office2013.Word;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using OpenXmlPowerTools;
+using DocumentFormat.OpenXml.VariantTypes;
 
 namespace JpoApi
 {
     public class Html2Word : IDisposable
     {
-        public string m_htmlName { get; set; }  // 
+        public int m_error { get; set; }
+        public readonly int e_NONE = 0x00000000;
+        public readonly int e_NETWORK = 0x00000001;
+        public readonly int e_SERVER = 0x00000002;
+        public readonly int e_TIMEOVER = 0x00000004;
+        public readonly int e_CONTENT = 0x00000008;
+        public readonly int e_ZIPFILE = 0x00000010;
+        public readonly int e_CACHE = 0x00000020;
+        public readonly int e_WORDFILE = 0x00000040;
+        public string m_htmlName { get; set; }  //
+        public string m_tmpDocxPath { get; set; }  // 
         public string m_docxPath { get; set; }  // 
-        private string m_htmlPath { get; set; }
+        private string m_htmlPath { get; set; } //
         private string m_docxName { get; set; }  // 
 
         private Word.Document m_wordDoc = null;
         private Word.Application m_oWord = null;
         private bool disposedValue;
-        public Html2Word(string htmlPath, string docxPath = null)
+        public Html2Word(string htmlPath, string docxPath, double arMargin, double alMargin, double abMargin, double atMargin)
         {
             try
             {
+                m_error = e_NONE;
                 m_htmlPath = htmlPath;
-                object odocxPath;
-                if (docxPath == null)
-                {
-                    // htmlファイルと同一パス・同一名称で拡張子のみ変更
-                    m_docxPath = Path.GetDirectoryName(htmlPath) + @"\" + Path.GetFileNameWithoutExtension(htmlPath) + ".docx";
-                }
-                else
-                {
-                    // htmlファイルと同一パス・同一名称で拡張子のみ変更
-                    m_docxPath = docxPath;
-                }
-                m_docxName = Path.GetFileNameWithoutExtension(m_docxPath);
+                // htmlファイルと同一パス・同一名称で拡張子のみ変更
+                m_tmpDocxPath = Path.GetDirectoryName(htmlPath) + @"\" + Path.GetFileNameWithoutExtension(htmlPath) + ".docx";
 
-                odocxPath = (object)m_docxPath;
-                if (File.Exists(m_docxPath))
+                m_docxName = Path.GetFileNameWithoutExtension(m_docxPath);
+                if (File.Exists(m_tmpDocxPath))
                 {
+                    /*
                     if(File.GetLastWriteTime(m_htmlPath) == File.GetLastWriteTime(m_docxPath))
                     {
                         return;
                     }
-                    File.Delete(m_docxPath);
+                    */
+                    File.Delete(m_tmpDocxPath);
                 }
-                object oHtmlPath = (object)htmlPath;
-                _Html2Word(oHtmlPath, odocxPath);
-                if(File.Exists(m_docxPath))
+                ConvertDOCX(htmlPath, m_tmpDocxPath, false, arMargin, alMargin, abMargin, atMargin);
+                if(File.Exists(m_tmpDocxPath))
                 {
-                    File.SetLastWriteTime(m_docxPath, File.GetLastWriteTime(m_htmlPath));
-                    File.SetCreationTime(m_docxPath, File.GetCreationTime(m_htmlPath));
-                    File.SetLastAccessTime(m_docxPath, File.GetLastAccessTime(m_htmlPath));
+                    File.SetLastWriteTime(m_tmpDocxPath, File.GetLastWriteTime(m_htmlPath));
+                    File.SetCreationTime(m_tmpDocxPath, File.GetCreationTime(m_htmlPath));
+                    File.SetLastAccessTime(m_tmpDocxPath, File.GetLastAccessTime(m_htmlPath));
+
+                    File.Copy(m_tmpDocxPath, docxPath,true);
+
                 }
                 else
                 {
+                    m_error = e_WORDFILE;
                     m_docxPath = "";
                 }
             }
             catch (Exception ex)
             {
+                m_error = e_WORDFILE;
                 m_docxPath = "";
                 return;
             }
         }
+        private static void ConvertDOCX(string htmlPath, string docxPath, bool isLandScape, double arMargin, double alMargin, double abMargin, double atMargin)
+        {
+            try
+            {
+                string htmlSectionID = "Sect1";
+                //Creating a word document using the the Open XML SDK 2.0
+                using (WordprocessingDocument document = WordprocessingDocument.Create(docxPath, WordprocessingDocumentType.Document))
+                {
+                    //create a paragraph
+                    MainDocumentPart mainDocumenPart = document.AddMainDocumentPart();
+                    mainDocumenPart.Document = new DocumentFormat.OpenXml.Wordprocessing.Document();
+                    Body documentBody = new Body();
+                    mainDocumenPart.Document.Append(documentBody);
+                    string htmlText = File.ReadAllText(htmlPath, System.Text.Encoding.GetEncoding("shift_jis"));
 
+                    MemoryStream ms = new MemoryStream(Encoding.GetEncoding("shift_jis").GetBytes(htmlText));
+
+                    // Create alternative format import part.
+                    AlternativeFormatImportPart formatImportPart = mainDocumenPart.AddAlternativeFormatImportPart(AlternativeFormatImportPartType.Html, htmlSectionID);
+
+                    //ms.Seek(0, SeekOrigin.Begin);
+
+                    // Feed HTML data into format import part (chunk).
+                    formatImportPart.FeedData(ms);
+                    AltChunk altChunk = new AltChunk();
+                    altChunk.Id = htmlSectionID;
+                    mainDocumenPart.Document.Body.Append(altChunk);
+                    /*
+                     inch equiv = 1440 (1 inch margin)
+                     */
+                    double width = 210.0 * 1440.0 / 25.4;   // A4 width
+                    double height = 297.0 * 1440.0 / 25.4;   // A4 height
+
+                    SectionProperties sectionProps = new SectionProperties();
+                    PageSize pageSize;
+                    if (isLandScape)
+                    {
+                        pageSize = new PageSize() { Width = (UInt32Value)height, Height = (UInt32Value)width, Orient = PageOrientationValues.Landscape };
+                    }
+                    else
+                    {
+                        pageSize = new PageSize() { Width = (UInt32Value)width, Height = (UInt32Value)height, Orient = PageOrientationValues.Portrait };
+                    }
+
+                    double rMargin = arMargin * 1440.0 / 25.4;
+                    double lMargin = alMargin * 1440.0 / 25.4;
+                    double bMargin = abMargin * 1440.0 / 25.4;
+                    double tMargin = atMargin * 1440.0 / 25.4;
+
+                    PageMargin pageMargin = new PageMargin() { Top = (Int32)tMargin, Right = (UInt32Value)rMargin, Bottom = (Int32)bMargin, Left = (UInt32Value)lMargin, Header = (UInt32Value)360U, Footer = (UInt32Value)360U, Gutter = (UInt32Value)0U };
+                    sectionProps.Append(pageSize);
+                    sectionProps.Append(pageMargin);
+                    mainDocumenPart.Document.Body.Append(sectionProps);
+
+                    //Saving/Disposing of the created word Document
+                    document.MainDocumentPart.Document.Save();
+                    document.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                return;
+            }
+        }
         private void _Html2Word(object oHtmlPath, object odocxPath)
         {
             try
@@ -99,6 +176,7 @@ namespace JpoApi
                 {
                     OpinionAmendmentページ設定();
                 }
+                /*
                 foreach (Paragraph paragraph in m_wordDoc.Paragraphs)
                 {
                     if (paragraph.Range.OMaths.Count == 0 && paragraph.Range.Tables.Count == 0 && paragraph.Range.InlineShapes.Count == 0)
@@ -107,6 +185,7 @@ namespace JpoApi
                         行設定(paragraph.Range.ParagraphFormat);
                     }
                 }
+                */
                 object fileFormat = WdSaveFormat.wdFormatDocumentDefault;
                 m_wordDoc.SaveAs2(ref odocxPath, ref fileFormat);
                 // 文書を閉じる

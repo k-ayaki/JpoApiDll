@@ -14,7 +14,8 @@ namespace testCaseNumberReference
             Account ac = new Account();
             AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path);
 
-            CaseNumberReference tj = new CaseNumberReference("application", "2020008423", at.m_access_token.access_token);
+            //CaseNumberReference tj = new CaseNumberReference("application", "2020008423", at.m_access_token.access_token);
+            CaseNumberReference tj = new CaseNumberReference("application", "2020000001", at.m_access_token.access_token);
             Console.WriteLine("■特許番号参照 application 2020008423");
             if (tj.m_error == tj.e_NONE)
             {

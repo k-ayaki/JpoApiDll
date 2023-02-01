@@ -14,8 +14,9 @@ namespace testCiteDocInfo
             Account ac = new Account();
             AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path);
 
-            CiteDocInfo tj4 = new CiteDocInfo("2015500069", at.m_access_token.access_token);
-            Console.WriteLine("■特許引用文献情報取得　2015500069");
+            //CiteDocInfo tj4 = new CiteDocInfo("2015500069", at.m_access_token.access_token);
+            CiteDocInfo tj4 = new CiteDocInfo("2020000001", at.m_access_token.access_token);
+            Console.WriteLine("■特許引用文献情報取得　2020000001");
             Console.WriteLine("ステータスコード：" + tj4.m_result.statusCode);
             Console.WriteLine("エラーメッセージ：" + tj4.m_result.errorMessage);
             Console.WriteLine("残アクセス数：" + tj4.m_result.remainAccessCount);

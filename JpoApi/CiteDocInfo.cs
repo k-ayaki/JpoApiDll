@@ -25,8 +25,13 @@ namespace JpoApi
         public readonly int e_CONTENT = 0x00000008;
         public readonly int e_ZIPFILE = 0x00000010;
         public readonly int e_CACHE = 0x00000020;
+
+        public string m_cacheDir { get; set; }
         public CData m_data { get; set; }
-        public CResult m_result { get; set; }
+        public CResult m_cache_result { get; set; }     // APIキャッシュの結果
+        public CResult m_result { get; set; }           // APIの結果
+
+        private string m_result_json = "{\r\n  \"result\": {\r\n    \"statusCode\": \"\",\r\n    \"errorMessage\": \"\",\r\n    \"remainAccessCount\": \"\"\r\n  }\r\n}\r\n";
         public class CNonPatentDoc  // 非特許文献情報
         {
             public string draftDate { get; set; }       // 起案日
@@ -69,65 +74,32 @@ namespace JpoApi
         public string m_jsonFile { get; set; }
         public CiteDocInfo(string applicationNumber,string a_access_token, string cacheDir = null)
         {
-            m_error = e_NONE;
-            JpoHttp jpo = new JpoHttp();
             try
             {
-                if (cacheDir == null)
-                {
-                    cacheDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\ayaki\jpoapi\cite_doc_info";
-                    Directory.CreateDirectory(cacheDir);
-                }
-                m_jsonFile = cacheDir + @"\" + applicationNumber + ".json";
-                if (File.Exists(m_jsonFile))
-                {
-                    System.IO.FileInfo fi = new System.IO.FileInfo(m_jsonFile);
-                    DateTime dt = DateTime.Now;
-                    Account ac = new Account();
-                    if (dt.AddDays(-ac.m_cacheEffective).Date <= fi.LastWriteTime.Date)
-                    {
-                        jpo.m_json = File.ReadAllText(m_jsonFile);
-                        /*
-                        using (FileStream inFile = new FileStream(m_jsonFile, FileMode.Open, FileAccess.Read))
-                        {
-                            // ファイルを読み取って一時メモリストリームに書き込み
-                            using (MemoryStream ms = new MemoryStream())
-                            {
-                                inFile.CopyTo(ms);
-                                jpo.m_content = ms.ToArray();
-                                //文字コードを指定して、メモリストリームをバイト配列に変換
-                                jpo.m_json = System.Text.Encoding.UTF8.GetString(jpo.m_content);
-                            }
-                        }
-                        */
-                        CCitedDocInfo applicant = JsonConvert.DeserializeObject<CCitedDocInfo>(jpo.m_json);
-                        m_result = applicant.result;
-                        m_data = applicant.result.data;
+                m_error = e_NONE;
+                CResult m_result = JsonConvert.DeserializeObject<CResult>(m_result_json);
+                CResult m_cache_result = JsonConvert.DeserializeObject<CResult>(m_result_json);
 
-                        switch (m_result.statusCode)
-                        {
-                            case "100":
-                                m_error = e_NONE;
-                                return;
-                            case "107": // 該当するデータがありません。
-                            case "108": // 該当する書類実体がありません。
-                            case "111": // 提供対象外の案件番号のため取得できませんでした。
-                            case "204": // パラメーターの入力された値に問題があります。
-                            case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
-                            case "301": // 指定された特許情報取得APIのURLは存在しません。
-                                m_error = e_CONTENT;
-                                return;
-                            case "203": // 1日のアクセス上限を超過したため閲覧を制限します。
-                            case "210": // 無効なトークンです。
-                            case "212": // 無効な認証情報です。
-                            case "302": // 処理が時間内に終了しないため、タイムアウトになりました。
-                            case "303": // アクセスが集中しています。
-                            case "400": // 無効なリクエストです。
-                            case "999": // 想定外のエラーが発生しました。
-                            default:
-                                break;
-                        }
+                m_cacheDir = "";
+                if (cacheDir != null)
+                {
+                    if (Directory.Exists(cacheDir))
+                    {
+                        m_cacheDir = cacheDir;
                     }
+                }
+                if (m_cacheDir.Length == 0)
+                {
+                    m_cacheDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\ayaki\jpoapi\cite_doc_info";
+                    if (Directory.Exists(m_cacheDir) == false)
+                    {
+                        Directory.CreateDirectory(m_cacheDir);
+                    }
+                }
+                m_jsonFile = m_cacheDir + @"\" + applicationNumber + ".json";
+                if (isCache() == e_CONTENT)
+                {
+                    return;
                 }
             }
             catch (System.IO.FileNotFoundException ex)
@@ -138,60 +110,119 @@ namespace JpoApi
             {
                 ;
             }
+            read(applicationNumber, a_access_token);
+        }
+
+        // キャッシュの存在チェック
+        private int isCache()
+        {
+            if (File.Exists(m_jsonFile))
+            {
+                System.IO.FileInfo fi = new System.IO.FileInfo(m_jsonFile);
+                DateTime dt = DateTime.Now;
+                Account ac = new Account();
+                if (dt.AddDays(-ac.m_cacheEffective).Date <= fi.LastWriteTime.Date)
+                {
+                    using (JpoHttp jpo = new JpoHttp())
+                    {
+                        jpo.m_json = File.ReadAllText(m_jsonFile);
+                        CCitedDocInfo applicant = JsonConvert.DeserializeObject<CCitedDocInfo>(jpo.m_json);
+                        m_result = applicant.result;
+                        m_cache_result = applicant.result;
+                        m_data = applicant.result.data;
+
+                        switch (m_cache_result.statusCode)
+                        {
+                            case "100":
+                                m_error = e_NONE;
+                                break;
+                            case "107": // 該当するデータがありません。
+                            case "108": // 該当する書類実体がありません。
+                            case "111": // 提供対象外の案件番号のため取得できませんでした。
+                            case "204": // パラメーターの入力された値に問題があります。
+                            case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
+                            case "301": // 指定された特許情報取得APIのURLは存在しません。
+                                m_error = e_CONTENT;
+                                break;
+                            case "203": // 1日のアクセス上限を超過したため閲覧を制限します。
+                            case "210": // 無効なトークンです。
+                            case "212": // 無効な認証情報です。
+                            case "302": // 処理が時間内に終了しないため、タイムアウトになりました。
+                            case "303": // アクセスが集中しています。
+                            case "400": // 無効なリクエストです。
+                            case "999": // 想定外のエラーが発生しました。
+                            default:
+                                break;
+                        }
+                        jpo.Dispose();
+                        return m_error;
+                    }
+                }
+                else
+                {
+                    m_error = e_CACHE;
+                }
+            }
+            else
+            {
+                m_error = e_CACHE;
+            }
+            return m_error;
+        }
+
+        private void read(string applicationNumber, string a_access_token)
+        {
             try
             {
-                NetworkState networkState = new NetworkState();
-                while (DateTime.Now.Second % 6 != networkState.m_i64macaddress % 6)
+                using (JpoHttp jpo = new JpoHttp())
                 {
-                    System.Threading.Thread.Sleep(100);
-                }
-                jpo.get(Properties.Settings.Default.url + @"/cite_doc_info/" + applicationNumber, a_access_token);
-                while (DateTime.Now.Second % 6 == networkState.m_i64macaddress % 6)
-                {
-                    System.Threading.Thread.Sleep(100);
-                }
-                if (jpo.m_error == jpo.e_NONE)
-                {
-                    CCitedDocInfo applicant = JsonConvert.DeserializeObject<CCitedDocInfo>(jpo.m_json);
-                    m_result = applicant.result;
-                    m_data = applicant.result.data;
-                    File.WriteAllText(m_jsonFile, jpo.m_json);
-                    /*
-                    if (m_result.statusCode == "100")
+                    NetworkState networkState = new NetworkState();
+                    while (DateTime.Now.Second % 6 != networkState.m_i64macaddress % 6)
                     {
-                        using (FileStream inFile = new FileStream(m_jsonFile, FileMode.Create, FileAccess.Write))
+                        System.Threading.Thread.Sleep(100);
+                    }
+                    jpo.get(Properties.Settings.Default.url + @"/cite_doc_info/" + applicationNumber, a_access_token);
+                    while (DateTime.Now.Second % 6 == networkState.m_i64macaddress % 6)
+                    {
+                        System.Threading.Thread.Sleep(100);
+                    }
+                    if (jpo.m_error == jpo.e_NONE)
+                    {
+                        CCitedDocInfo applicant = JsonConvert.DeserializeObject<CCitedDocInfo>(jpo.m_json);
+                        m_result = applicant.result;
+                        m_data = applicant.result.data;
+                        File.WriteAllText(m_jsonFile, jpo.m_json);
+                        switch (m_result.statusCode)
                         {
-                            inFile.Write(jpo.m_content, 0, jpo.m_content.Length);
+                            case "100":
+                                m_error = e_NONE;
+                                break;
+                            case "107": // 該当するデータがありません。
+                            case "108": // 該当する書類実体がありません。
+                            case "111": // 提供対象外の案件番号のため取得できませんでした。
+                            case "204": // パラメーターの入力された値に問題があります。
+                            case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
+                            case "301": // 指定された特許情報取得APIのURLは存在しません。
+                            case "203": // 1日のアクセス上限を超過したため閲覧を制限します。
+                            case "210": // 無効なトークンです。
+                            case "212": // 無効な認証情報です。
+                            case "302": // 処理が時間内に終了しないため、タイムアウトになりました。
+                            case "303": // アクセスが集中しています。
+                            case "400": // 無効なリクエストです。
+                            case "999": // 想定外のエラーが発生しました。
+                            default:
+                                m_error = e_CONTENT;
+                                break;
                         }
                     }
-                    */
-                    switch (m_result.statusCode)
+                    else
                     {
-                        case "100":
-                            m_error = e_NONE;
-                            break;
-                        case "107": // 該当するデータがありません。
-                        case "108": // 該当する書類実体がありません。
-                        case "111": // 提供対象外の案件番号のため取得できませんでした。
-                        case "204": // パラメーターの入力された値に問題があります。
-                        case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
-                        case "301": // 指定された特許情報取得APIのURLは存在しません。
-                        case "203": // 1日のアクセス上限を超過したため閲覧を制限します。
-                        case "210": // 無効なトークンです。
-                        case "212": // 無効な認証情報です。
-                        case "302": // 処理が時間内に終了しないため、タイムアウトになりました。
-                        case "303": // アクセスが集中しています。
-                        case "400": // 無効なリクエストです。
-                        case "999": // 想定外のエラーが発生しました。
-                        default:
-                            m_error = e_CONTENT;
-                            break;
+                        m_error = jpo.m_error;
                     }
-                } else
-                {
-                    m_error = jpo.m_error;
+                    jpo.Dispose();
+                    return;
                 }
-                jpo.Dispose();
+                m_error = e_NETWORK;
             }
             catch (System.IO.FileNotFoundException ex)
             {

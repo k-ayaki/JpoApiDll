@@ -14,6 +14,16 @@ using System.Web.Caching;
 using System.Security;
 using System.Xml.Linq;
 using System.Web;
+//using Microsoft.Office.Core;
+//using static System.Net.WebRequestMethods;
+//using System.Drawing.Printing;
+//using System.Reflection.Emit;
+//using System.Web.UI.WebControls;
+//using System.Web.UI;
+//using static System.Net.Mime.MediaTypeNames;
+//using System.Runtime.InteropServices;
+//using File = System.IO.File;
+//using Microsoft.Win32;
 
 namespace JpoApi
 {
@@ -52,19 +62,24 @@ namespace JpoApi
                 m_DocNumber2 = a_DocNumber;
 
                 string wHtmlbody = _Xml2Html();
-                if (File.Exists(m_htmlPath))
+                if (System.IO.File.Exists(m_htmlPath))
                 {
-                    if (File.GetLastWriteTime(m_htmlPath) == File.GetLastWriteTime(m_xmlPath))
+                    /*
+                    if (System.IO.File.GetLastWriteTime(m_htmlPath) == System.IO.File.GetLastWriteTime(m_xmlPath))
                     {
                         return;
                     }
-                    File.Delete(m_htmlPath);
-                } 
-                File.WriteAllText(m_htmlPath, wHtmlbody, Encoding.GetEncoding("shift_jis"));
-                File.SetLastWriteTime(m_htmlPath, File.GetLastWriteTime(m_xmlPath));
-                File.SetCreationTime(m_htmlPath, File.GetCreationTime(m_xmlPath));
-                File.SetLastAccessTime(m_htmlPath, File.GetLastAccessTime(m_xmlPath));
-                if (File.Exists(m_htmlPath) == false)
+                    */
+                    System.IO.File.Delete(m_htmlPath);
+                }
+                System.IO.File.WriteAllText(m_htmlPath, wHtmlbody, Encoding.GetEncoding("shift_jis"));
+                if (System.IO.File.Exists(m_htmlPath))
+                {
+                    System.IO.File.SetLastWriteTime(m_htmlPath, System.IO.File.GetLastWriteTime(m_xmlPath));
+                    System.IO.File.SetCreationTime(m_htmlPath, System.IO.File.GetCreationTime(m_xmlPath));
+                    System.IO.File.SetLastAccessTime(m_htmlPath, System.IO.File.GetLastAccessTime(m_xmlPath));
+                }
+                else
                 {
                     m_error = e_CACHE;
                 }
@@ -92,10 +107,8 @@ namespace JpoApi
                 xmlNsManager.AddNamespace("jp", "http://www.jpo.go.jp");
 
                 xDoc.XmlResolver = null;
-                if (File.Exists(m_xmlPath))
+                if (System.IO.File.Exists(m_xmlPath))
                 {
-                    //string szXml = File.ReadAllText(xmlPath, Encoding.GetEncoding("shift_jis"));
-                    //xDoc.LoadXml(szXml);
                     xDoc.Load(m_xmlPath);
                 }
                 else
@@ -146,15 +159,15 @@ namespace JpoApi
             try
             {
                 m_title = title_amendment(node, xmlNsManager);
-                string wHtmlbody = "<html><head>";
-                wHtmlbody += "<title>" + m_title + "</title>\r\n";
-                wHtmlbody += "<meta charset=\"shift_jis\"></head><body><div><font face=\"ＭＳ明朝\"><p>\r\n";
-
+                string wHtmlbody = "<html>";
+                wHtmlbody += html_head(m_title);
+                string wHtmlbody2 = "";
                 foreach (XmlNode node2 in node.ChildNodes)
                 {
-                    wHtmlbody += html_amendment(node2, xmlNsManager);
+                    wHtmlbody2 += html_amendment(node2, xmlNsManager);
                 }
-                wHtmlbody += "</p></font></div></body></html>\r\n";
+                wHtmlbody += html_body(wHtmlbody2);
+                wHtmlbody += "</html>\r\n";
                 return wHtmlbody;
             }
             catch (Exception ex)
@@ -163,20 +176,125 @@ namespace JpoApi
             }
         }
 
+        private string html_head(string szTitle)
+        {
+            string head = "<html>\r\n"
+                + "\r\n"
+                + "<head>\r\n"
+                + "<title>" + szTitle + "</title>\r\n"
+                + "<meta http-equiv=Content-Type content=\"text/html; charset=shift_jis\">\r\n" 
+                + "<meta name=Generator content=\"Microsoft Word 15 (filtered)\">\r\n"
+                + "<style>\r\n"
+                + "<!--\r\n"
+                + " /* Font Definitions */\r\n"
+                + "@font-face\r\n"
+                + "\t{font-family:\"ＭＳ 明朝\";\r\n"
+                + "\tpanose-1:2 2 6 9 4 2 5 8 3 4;}\r\n"
+                + "@font-face\r\n"
+                + "\t{font-family:\"Cambria Math\";\r\n"
+                + "\tpanose-1:2 4 5 3 5 4 6 3 2 4;}\r\n"
+                + "@font-face\r\n"
+                + "\t{font-family:\"ＭＳ Ｐゴシック\";\r\n"
+                + "\tpanose-1:2 11 6 0 7 2 5 8 2 4;}\r\n"
+                + "@font-face\r\n"
+                + "\t{font-family:ＭＳ明朝;\r\n"
+                + "\tpanose-1:0 0 0 0 0 0 0 0 0 0;}\r\n"
+                + "@font-face\r\n"
+                + "\t{font-family:\"\\@ＭＳ Ｐゴシック\";\r\n"
+                + "\tpanose-1:2 11 6 0 7 2 5 8 2 4;}\r\n"
+                + "@font-face\r\n"
+                + "\t{font-family:\"\\@ＭＳ 明朝\";\r\n"
+                + "\tpanose-1:2 2 6 9 4 2 5 8 3 4;}\r\n"
+                + "@font-face\r\n"
+                + "\t{font-family:\"\\@ＭＳ明朝\";\r\n"
+                + "\tpanose-1:0 0 0 0 0 0 0 0 0 0;}\r\n"
+                + " /* Style Definitions */\r\n"
+                + " p\r\n"
+                + "\t{margin-right:0mm;\r\n"
+                + "\tmargin-left:0mm;\r\n"
+                + "\tfont-size:12.0pt;\r\n"
+                + "\tfont-family:\"ＭＳ Ｐゴシック\";\r\n"
+                + "\tcolor:black;}\r\n"
+                + ".MsoChpDefault\r\n"
+                + "\t{font-family:\"游明朝\",serif;}\r\n"
+                + " /* Page Definitions */\r\n"
+                + " @page WordSection1\r\n"
+                + "\t{size:595.25pt 841.85pt;\r\n"
+                + "\tmargin:20.0mm 20.0mm 42.5pt 20.0mm;\r\n"
+                + "\tlayout-grid:16.3pt .05pt;}\r\n"
+                + "div.WordSection1\r\n"
+                + "\t{page:WordSection1;}\r\n"
+                + "-->\r\n"
+                + "</style>\r\n"
+                + "\r\n"
+                + "</head>\r\n\r\n";
+            return head;
+        }
+        private string html_body(string contents)
+        {
+            string body = "<body lang=JA style='word-wrap:break-word'>\r\n"
+                        + "\r\n"
+                        + "<div class=WordSection1 style='layout-grid:16.3pt .05pt'>\r\n"
+                        + "\r\n"
+                        + "<div>\r\n";
+            body += contents;
+            body += "</div>\r\n"
+                    + "\r\n"
+                    + "</div>\r\n"
+                    + "\r\n"
+                    + "</body>\r\n\r\n";
+            return body;
+        }
+
+        private string html_p(string szText)
+        {
+            szText = szText.Replace("\r\n", "");
+            string[] separatingStrings = { "<br />" };
+            string[] lines = szText.Split(separatingStrings, System.StringSplitOptions.None);
+            string p = "";
+            foreach(string line in lines)
+            {
+                p += "<p style='margin:0mm;line-height:14.8pt;punctuation-wrap:simple;vertical-align:\r\n"
+                   + "baseline;word-break:break-all'>";
+                if (line.Length > 0)
+                {
+                    p += "<span style='font-family:\"ＭＳ 明朝\",serif'>";
+                    p += line;
+                }
+                else
+                {
+                    p += "<span lang=EN-US style='color:windowtext'>&nbsp;";
+                }
+                p += "</span></p>\r\n\r\n";
+            }
+            return p;
+        }
+        private string html_img(string szImg)
+        {
+            string p = "<p style='punctuation-wrap:simple;word-break:break-all'><span lang=X-NONE\r\n"
+                    + "style='font-size:10.5pt;font-family:\"Arial\",sans-serif;border:none black 1.0pt;\r\n"
+                    + "padding:0mm'>";
+            p += szImg;
+            p += "</span></p>\r\n";
+            return p;
+        }
+
         // 意見書への変換
         private string html_pat_rspns(XmlNode node, XmlNamespaceManager xmlNsManager)
         {
             try
             {
                 m_title = title_rspns(node, xmlNsManager);
-                string wHtmlbody = "<html><head>";
-                wHtmlbody += "<title>" + m_title + "</title>\r\n";
-                wHtmlbody += "<meta charset=\"shift_jis\"></head><body><div><font face=\"ＭＳ明朝\"><p>\r\n";
+                string wHtmlbody = "<html>";
+                wHtmlbody += html_head(m_title);
+
+                string wHtmlbody2 = "";
                 foreach (XmlNode node2 in node.ChildNodes)
                 {
-                    wHtmlbody += html_rspns(node2, xmlNsManager);
+                    wHtmlbody2 += html_rspns(node2, xmlNsManager);
                 }
-                wHtmlbody += "</p></font></div></body></html>\r\n";
+                wHtmlbody += html_body(wHtmlbody2);
+                wHtmlbody += "</html>\r\n";
                 return wHtmlbody;
             }
             catch (Exception ex)
@@ -191,14 +309,13 @@ namespace JpoApi
             try
             {
                 m_title = title_attaching_document(node, xmlNsManager);
-                string wHtmlbody = "<html><head>";
-                wHtmlbody += "<title>" + m_title + "</title>\r\n";
-                wHtmlbody += "<meta charset=\"shift_jis\"></head><body><div><font face=\"ＭＳ明朝\"><p>\r\n";
+                string wHtmlbody = "<html>" + html_head(m_title);
+                string wHtmlbody2 = "";
                 foreach (XmlNode node2 in node.ChildNodes)
                 {
-                    wHtmlbody += attaching_document(node2, xmlNsManager);
+                    wHtmlbody2 += attaching_document(node2, xmlNsManager);
                 }
-                wHtmlbody += "</p></font></div></body></html>\r\n";
+                wHtmlbody += html_body(wHtmlbody2) + "</html>";
                 return wHtmlbody;
             }
             catch (Exception ex)
@@ -294,7 +411,7 @@ namespace JpoApi
                             wHtmlbody += submission_date(node2, xmlNsManager);
                             break;
                         case "addressed-to-person":
-                            wHtmlbody += "【あて先】　　　　　　" + node2.InnerText + "<br />\r\n";
+                            wHtmlbody += html_p("【あて先】　　　　　　" + node2.InnerText);
                             break;
                         case "indication-of-case-article":  // 事件名
                             wHtmlbody += indication_of_case_article(node2, xmlNsManager);
@@ -306,7 +423,7 @@ namespace JpoApi
                             wHtmlbody += agents(node2, xmlNsManager, "代理人");
                             break;
                         case "dispatch-number":
-                            wHtmlbody += "【発送番号】　　　　　" + Strings.StrConv(node2.InnerText, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                            wHtmlbody += html_p("【発送番号】　　　　　" + Strings.StrConv(node2.InnerText, VbStrConv.Wide, 0x411));
                             break;
                         case "amendment-article":
                             wHtmlbody += amendment_article(node2, xmlNsManager);
@@ -339,7 +456,7 @@ namespace JpoApi
             try
             {
                 string wHtmlbody = "";
-                wHtmlbody += "【書類名】　　　　　　" + document_code2desc(node.InnerText) + "<br />\r\n";
+                wHtmlbody += html_p("【書類名】　　　　　　" + document_code2desc(node.InnerText));
                 return wHtmlbody;
             }
             catch (Exception ex)
@@ -352,7 +469,7 @@ namespace JpoApi
             try
             {
                 string wHtmlbody = "";
-                wHtmlbody += "【整理番号】　　　　　" + Strings.StrConv(node.InnerText, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                wHtmlbody += html_p("【整理番号】　　　　　" + Strings.StrConv(node.InnerText, VbStrConv.Wide, 0x411));
                 return wHtmlbody;
             }
             catch (Exception ex)
@@ -365,12 +482,12 @@ namespace JpoApi
             try
             {
                 string wHtmlbody = "";
-                wHtmlbody += "【事件の表示】<br />\r\n";
+                wHtmlbody += html_p("【事件の表示】");
                 XmlNode node_appeal_reference = node.SelectSingleNode("jp:appeal-reference/jp:doc-number", xmlNsManager);
                 if (node_appeal_reference != null)
                 {
                     string doc_number = Microsoft.VisualBasic.Strings.StrConv(node_appeal_reference.InnerText, VbStrConv.Wide, 0x411);
-                    wHtmlbody += "　　【審判番号】　　　不服" + doc_number.Substring(0, 4) + "－" + doc_number.Substring(4) + "<br />\r\n";
+                    wHtmlbody += html_p("　　【審判番号】　　　不服" + doc_number.Substring(0, 4) + "－" + doc_number.Substring(4));
                 }
                 XmlNode node_applicaton_reference = node.SelectSingleNode("jp:application-reference", xmlNsManager);
                 XmlNode node_doc_number = node.SelectSingleNode("jp:application-reference/jp:document-id/jp:doc-number", xmlNsManager);
@@ -380,12 +497,12 @@ namespace JpoApi
                     {
                         case "international-application":
                             string international_application_number = node_doc_number.InnerText;
-                            wHtmlbody += "　　【国際出願番号】　PCT/" + international_application_number.Substring(0, 6) + "/" + international_application_number.Substring(6) + "<br />\r\n";
-                            wHtmlbody += "　　【出願の区分】　　特許<br />\r\n";
+                            wHtmlbody += html_p("　　【国際出願番号】　PCT/" + international_application_number.Substring(0, 6) + "/" + international_application_number.Substring(6));
+                            wHtmlbody += html_p("　　【出願の区分】　　特許");
                             break;
                         case "application":
                             string doc_number = Microsoft.VisualBasic.Strings.StrConv(node_doc_number.InnerText, VbStrConv.Wide, 0x411);
-                            wHtmlbody += "　　【出願番号】　　　特願" + doc_number.Substring(0, 4) + "－" + doc_number.Substring(4) + "<br />\r\n";
+                            wHtmlbody += html_p("　　【出願番号】　　　特願" + doc_number.Substring(0, 4) + "－" + doc_number.Substring(4));
                             break;
                     }
                 }
@@ -404,7 +521,7 @@ namespace JpoApi
                 XmlNode node_payment = node.SelectSingleNode("jp:charge-article/jp:payment", xmlNsManager);
                 if (node_payment != null)
                 {
-                    wHtmlbody += "【手数料の表示】<br />\r\n";
+                    wHtmlbody += html_p("【手数料の表示】");
                     wHtmlbody += payment(node_payment, xmlNsManager);
                 }
                 return wHtmlbody;
@@ -440,15 +557,15 @@ namespace JpoApi
                 switch (account_type)
                 {
                     case "credit-card":
-                        wHtmlbody += "　　【指定立替納付】<br />\r\n";
+                        wHtmlbody += html_p("　　【指定立替納付】");
                         break;
                     case "transfer":
-                        wHtmlbody += "　　【振替番号】　　　" + Strings.StrConv(number, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                        wHtmlbody += html_p("　　【振替番号】　　　" + Strings.StrConv(number, VbStrConv.Wide, 0x411));
                         break;
                 }
                 if (amount.Length > 0)
                 {
-                    wHtmlbody += "　　【納付金額】　　　" + Strings.StrConv(amount, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                    wHtmlbody += html_p("　　【納付金額】　　　" + Strings.StrConv(amount, VbStrConv.Wide, 0x411));
                 }
                 return wHtmlbody;
             }
@@ -467,24 +584,24 @@ namespace JpoApi
                 string w_item_of_amendment = "";
                 foreach (XmlNode node2 in node.ChildNodes)
                 {
-                    wHtmlbody += "【手続補正" + Strings.StrConv(node2.Attributes["jp:serial-number"].Value, VbStrConv.Wide, 0x411) + "】<br />\r\n";
-                    foreach(XmlNode node3 in node2.ChildNodes)
+                    wHtmlbody += html_p("【手続補正" + Strings.StrConv(node2.Attributes["jp:serial-number"].Value, VbStrConv.Wide, 0x411) + "】");
+                    foreach (XmlNode node3 in node2.ChildNodes)
                     {
                         switch (node3.LocalName)
                         {
                             case "document-code":
-                                wHtmlbody += "　【補正対象書類名】　" + document_code2desc(node3.InnerText) + "<br />\r\n";
+                                wHtmlbody += html_p("　【補正対象書類名】　" + document_code2desc(node3.InnerText));
                                 break;
                             case "item-of-amendment":
-                                wHtmlbody += "　【補正対象項目名】　" + node3.InnerText + "<br />\r\n";
+                                wHtmlbody += html_p("　【補正対象項目名】　" + node3.InnerText);
                                 w_item_of_amendment = node3.InnerText;
                                 break;
                             case "way-of-amendment":
-                                wHtmlbody += "　【補正方法】　　　　" + way_of_amendment(node3.InnerText) + "<br />\r\n";
+                                wHtmlbody += html_p("　【補正方法】　　　　" + way_of_amendment(node3.InnerText));
                                 break;
                             case "contents-of-amendment":
-                                wHtmlbody += "　【補正の内容】<br />\r\n";
-                                switch(node3.Attributes["jp:kind-of-document"].Value)
+                                wHtmlbody += html_p("　【補正の内容】");
+                                switch (node3.Attributes["jp:kind-of-document"].Value)
                                 {
                                     case "claims":
                                         wHtmlbody += claims(node3, xmlNsManager);
@@ -525,15 +642,15 @@ namespace JpoApi
                     switch (node2.Name)
                     {
                         case "claims":
-                            wHtmlbody += "　　【書類名】特許請求の範囲<br />\r\n";
+                            wHtmlbody += html_p("　　【書類名】特許請求の範囲");
                             wHtmlbody += claims(node2, xmlNsManager);
                             break;
                         case "claim":
-                            wHtmlbody += "　　【請求項" + Strings.StrConv(node2.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】<br />\r\n";
+                            wHtmlbody += html_p("　　【請求項" + Strings.StrConv(node2.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】");
                             wHtmlbody += claims(node2, xmlNsManager);
                             break;
                         case "claim-text":
-                            wHtmlbody += "" + p2html(node2) + "<br />\r\n";
+                            wHtmlbody += html_p(p2html(node2));
                             break;
                     }
                 }
@@ -554,111 +671,112 @@ namespace JpoApi
                     switch (node2.Name)
                     {
                         case "description":
-                            wHtmlbody += "【書類名】明細書<br />\r\n";
+                            wHtmlbody += html_p("【書類名】明細書");
                             wHtmlbody += description(node2, xmlNsManager);
                             break;
                         case "p":
-                            wHtmlbody += "　　【" + Strings.StrConv(node2.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】<br />\r\n";
-                            wHtmlbody += "" + p2html(node2) + "<br />\r\n";
+                            wHtmlbody += html_p("　　【" + Strings.StrConv(node2.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】");
+                            wHtmlbody += html_p(p2html(node2));
                             break;
                         case "invention-title":
-                            wHtmlbody += "【発明の名称】" + p2html(node2) + "<br />\r\n";
+                            wHtmlbody += html_p("【発明の名称】" + p2html(node2));
                             break;
                         case "technical-field":
-                            wHtmlbody += "【技術分野】<br />\r\n";
+                            wHtmlbody += html_p("【技術分野】");
                             wHtmlbody += description(node2, xmlNsManager);
                             break;
                         case "background-art":
-                            wHtmlbody += "【背景技術】<br />\r\n";
+                            wHtmlbody += html_p("【背景技術】");
                             wHtmlbody += description(node2, xmlNsManager);
                             break;
                         case "citation-list":
-                            wHtmlbody += "【先行技術文献】<br />\r\n";
+                            wHtmlbody += html_p("【先行技術文献】");
                             foreach (XmlNode node3 in node2.ChildNodes)
                             {
                                 switch (node3.Name)
                                 {
                                     case "patent-literature":
-                                        wHtmlbody += "【特許文献】<br />\r\n";
+                                        wHtmlbody += html_p("【特許文献】");
                                         wHtmlbody += description(node3, xmlNsManager);
                                         break;
                                     case "non-patent-literature":
-                                        wHtmlbody += "【非特許文献】<br />\r\n";
+                                        wHtmlbody += html_p("【非特許文献】");
                                         wHtmlbody += description(node3, xmlNsManager);
                                         break;
                                     case "heading":
-                                        wHtmlbody += "【" + node2.InnerText + "】<br />\r\n";
+                                        wHtmlbody += html_p("【" + node2.InnerText + "】");
                                         break;
                                 }
                             }
                             break;
                         case "cited-others":
-                            wHtmlbody += "【参考文献】<br />\r\n";
+                            wHtmlbody += html_p("【参考文献】");
                             wHtmlbody += description(node2, xmlNsManager);
                             break;
                         case "summary-of-invention":
-                            wHtmlbody += "【発明の概要】<br />\r\n";
+                            wHtmlbody += html_p("【発明の概要】");
                             foreach (XmlNode node3 in node2.ChildNodes)
                             {
                                 switch (node3.Name)
                                 {
                                     case "tech-problem":
-                                        wHtmlbody += "【発明が解決しようとする課題】<br />\r\n";
+                                        wHtmlbody += html_p("【発明が解決しようとする課題】");
                                         wHtmlbody += description(node3, xmlNsManager);
                                         break;
                                     case "tech-solution":
-                                        wHtmlbody += "【課題を解決するための手段】<br />\r\n";
+                                        wHtmlbody += html_p("【課題を解決するための手段】");
                                         wHtmlbody += description(node3, xmlNsManager);
                                         break;
                                     case "advantageous-effects":
-                                        wHtmlbody += "【発明の効果】<br />\r\n";
+                                        wHtmlbody += html_p("【発明の効果】");
                                         wHtmlbody += description(node3, xmlNsManager);
                                         break;
                                     case "heading":
-                                        wHtmlbody += "【" + node2.InnerText + "】<br />\r\n";
+                                        wHtmlbody += html_p("【" + node2.InnerText + "】");
                                         break;
                                 }
                             }
                             break;
                         case "description-of-drawings":
-                            wHtmlbody += "【図面の簡単な説明】<br />\r\n";
+                            wHtmlbody += html_p("【図面の簡単な説明】");
                             wHtmlbody += description(node2, xmlNsManager);
                             break;
                         case "description-of-embodiments":
-                            wHtmlbody += "【発明を実施するための形態】<br />\r\n";
+                            wHtmlbody += html_p("【発明を実施するための形態】");
                             wHtmlbody += description(node2, xmlNsManager);
                             break;
                         case "embodiments-example":
-                            if (node2.Attributes["ex-num"].Value == null)
+                            if (node2.Attributes.Count == 0 
+                            || node2.Attributes["ex-num"].Value == null)
                             {
-                                wHtmlbody += "【実施例】<br />\r\n";
+                                wHtmlbody += html_p("【実施例】");
                             }
                             else
                             {
-                                wHtmlbody += "【実施例" + Strings.StrConv(node2.Attributes["ex-num"].Value, VbStrConv.Wide, 0x411) + "】<br />\r\n";
+                                wHtmlbody += html_p("【実施例" + Strings.StrConv(node2.Attributes["ex-num"].Value, VbStrConv.Wide, 0x411) + "】");
                             }
                             wHtmlbody += description(node2, xmlNsManager);
                             break;
                         case "best-mode":
-                            wHtmlbody += "【発明を実施するための最良の形態】<br />\r\n";
+                            wHtmlbody += html_p("【発明を実施するための最良の形態】");
                             wHtmlbody += description(node2, xmlNsManager);
                             break;
                         case "industrial-applicability":
-                            wHtmlbody += "【産業上の利用可能性】<br />\r\n";
+                            wHtmlbody += html_p("【産業上の利用可能性】");
                             wHtmlbody += description(node2, xmlNsManager);
                             break;
                         case "disclosure":
-                            wHtmlbody += "【発明の開示】<br />\r\n";
+                            wHtmlbody += html_p("【発明の開示】");
                             break;
                         case "reference-to-deposited-biological-material":
-                            wHtmlbody += "【受託番号】<br />\r\n";
+                            wHtmlbody += html_p("【受託番号】");
                             break;
                         case "reference-signs-list":
-                            wHtmlbody += "【符号の説明】<br />\r\n";
+                            wHtmlbody += html_p("【符号の説明】");
                             wHtmlbody += description(node2, xmlNsManager);
                             break;
                         case "heading":
-                            wHtmlbody += "【" + node2.InnerText + "】<br />\r\n";
+                            wHtmlbody += html_p("【" + node2.InnerText + "】");
                             break;
                     }
                 }
@@ -677,9 +795,9 @@ namespace JpoApi
                 string wHtmlbody = "";
                 if (a_item_of_amendment == "全文")
                 {
-                    wHtmlbody += "　　【書類名】要約書<br />\r\n";
+                    wHtmlbody += html_p("　　【書類名】要約書");
                 }
-                wHtmlbody += p2html(node) + "<br />\r\n";
+                wHtmlbody += html_p(p2html(node));
                 return wHtmlbody;
             }
             catch (Exception ex)
@@ -707,7 +825,7 @@ namespace JpoApi
                             wHtmlbody += ipc_article(node2, xmlNsManager, a_item_of_amendment);
                             break;
                         case "addressed-to-person":     // あて先
-                            wHtmlbody += "【あて先】　　　　　　" + node2.InnerText + "<br />\r\n";
+                            wHtmlbody += html_p("【あて先】　　　　　　" + node2.InnerText);
                             break;
                         case "indication-of-case-article":  // 事件名
                             wHtmlbody += indication_of_case_article(node2, xmlNsManager);
@@ -725,13 +843,8 @@ namespace JpoApi
                             wHtmlbody += submission_object_list_article(node2, xmlNsManager, a_item_of_amendment);
                             break;
                         case "law-of-industrial-regenerate":
-                            wHtmlbody += "　　【" + a_item_of_amendment + "】" + p2html(node2) + "<br />\r\n";
+                            wHtmlbody += html_p("　　【" + a_item_of_amendment + "】" + p2html(node2));
                             break;
-                            /*
-                        case "drawings":        // 図面
-                            wHtmlbody += drawings(node2, xmlNsManager, a_item_of_amendment);
-                            break;
-                            */
                     }
                 }
                 return wHtmlbody;
@@ -747,7 +860,7 @@ namespace JpoApi
         {
             try
             {
-                string wHtmlbody = "【提出日】　　　　　　" + ad2jpCalender(node.InnerText) + "<br />\r\n";
+                string wHtmlbody = html_p("【提出日】　　　　　　" + ad2jpCalender(node.InnerText));
                 return wHtmlbody;
             }
             catch (Exception ex)
@@ -769,7 +882,7 @@ namespace JpoApi
                     switch (node2.LocalName)
                     {
                         case "ipc":
-                            wHtmlbody += "" + wItemName + Strings.StrConv(node2.InnerText, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                            wHtmlbody += html_p(wItemName + Strings.StrConv(node2.InnerText, VbStrConv.Wide, 0x411));
                             wItemName = "　　　　　　　　";
                             break;
                     }
@@ -792,7 +905,7 @@ namespace JpoApi
                 switch (node2.LocalName)
                 {
                     case "inventor":
-                        wHtmlbody += "　　【" + a_item_of_amendment + "】<br />\r\n";
+                        wHtmlbody += html_p("　　【" + a_item_of_amendment + "】");
                         foreach (XmlNode node3 in node2.ChildNodes)
                         {
                             switch(node3.LocalName)
@@ -819,7 +932,7 @@ namespace JpoApi
                     switch (node2.LocalName)
                     {
                         case "applicant":
-                            wHtmlbody += "【" + a_item_of_amendment + "】<br />\r\n";
+                            wHtmlbody += html_p("【" + a_item_of_amendment + "】");
                             foreach (XmlNode node3 in node2.ChildNodes)
                             {
                                 switch (node3.LocalName)
@@ -850,7 +963,7 @@ namespace JpoApi
                     switch (node2.LocalName)
                     {
                         case "agent":
-                            wHtmlbody += "【" + a_item_of_amendment + "】<br />\r\n";
+                            wHtmlbody += html_p("【" + a_item_of_amendment + "】");
                             foreach (XmlNode node3 in node2.ChildNodes)
                             {
                                 switch (node3.LocalName)
@@ -878,28 +991,28 @@ namespace JpoApi
                 XmlNode node_list_group = node.SelectSingleNode("jp:list-group", xmlNsManager);
                 if (node_list_group != null)
                 {
-                    wHtmlbody += "　　【" + a_item_of_amendment + "】<br />\r\n";
+                    wHtmlbody += html_p("　　【" + a_item_of_amendment + "】");
                     XmlNode node_document_name = node_list_group.SelectSingleNode("jp:document-name", xmlNsManager);
                     XmlNode node_number_of_object = node_list_group.SelectSingleNode("jp:number-of-object", xmlNsManager);
                     if (node_document_name != null
                     && node_number_of_object != null)
                     {
-                        wHtmlbody += "　　【物件名】　　　　" + node_document_name.InnerText + "　" + Strings.StrConv(node_number_of_object.InnerText, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                        wHtmlbody += html_p("　　【物件名】　　　　" + node_document_name.InnerText + "　" + Strings.StrConv(node_number_of_object.InnerText, VbStrConv.Wide, 0x411));
                     }
                     XmlNode node_citation = node_list_group.SelectSingleNode("jp:citation", xmlNsManager);
                     if (node_citation != null)
                     {
-                        wHtmlbody += "　　【援用の表示】　　" + p2html(node_citation) + "<br />\r\n";
+                        wHtmlbody += html_p("　　【援用の表示】　　" + p2html(node_citation));
                     }
                     XmlNode node_general_power_of_attorney_id = node_list_group.SelectSingleNode("jp:general-power-of-attorney-id", xmlNsManager);
                     if (node_general_power_of_attorney_id != null)
                     {
-                        wHtmlbody += "　　【包括委任状番号】" + Strings.StrConv(node_general_power_of_attorney_id.InnerText, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                        wHtmlbody += html_p("　　【包括委任状番号】" + Strings.StrConv(node_general_power_of_attorney_id.InnerText, VbStrConv.Wide, 0x411));
                     }
                     XmlNode node_dtext = node_list_group.SelectSingleNode("jp:dtext", xmlNsManager);
                     if (node_dtext != null)
                     {
-                        wHtmlbody += "　　【提出物件の特記事項】" + p2html(node_dtext) + "<br />\r\n";
+                        wHtmlbody += html_p("　　【提出物件の特記事項】" + p2html(node_dtext));
                     }
                 }
                 return wHtmlbody;
@@ -918,13 +1031,13 @@ namespace JpoApi
                 string wHtmlbody = "";
                 if (node != null)
                 {
-                    wHtmlbody += "【手数料補正】<br />\r\n";
+                    wHtmlbody += html_p("【手数料補正】");
                     foreach (XmlNode node2 in node.ChildNodes)
                     {
                         switch (node2.LocalName)
                         {
                             case "document-code":
-                                wHtmlbody += "　【補正対象書類名】　" + document_code2desc(node2.InnerText) + "<br />\r\n";
+                                wHtmlbody += html_p("　【補正対象書類名】　" + document_code2desc(node2.InnerText));
                                 break;
                             case "charge-article":
                                 XmlNode node_payment = node2.SelectSingleNode("jp:payment", xmlNsManager);
@@ -935,17 +1048,17 @@ namespace JpoApi
                                     {
                                         if (node_account.Attributes["account-type"].Value == "credit-card")
                                         {
-                                            wHtmlbody += "　【指定立替納付】<br />\r\n";
+                                            wHtmlbody += html_p("　【指定立替納付】");
                                         }
                                         else
                                         {
-                                            wHtmlbody += "　【振替番号】　　　　" + Strings.StrConv(node_account.Attributes["number"].Value, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                                            wHtmlbody += html_p("　【振替番号】　　　　" + Strings.StrConv(node_account.Attributes["number"].Value, VbStrConv.Wide, 0x411));
                                         }
                                     }
                                     XmlNode node_fee = node_payment.SelectSingleNode("jp:fee", xmlNsManager);
                                     if (node_fee != null)
                                     {
-                                        wHtmlbody += "　　【納付金額】　　　" + Strings.StrConv(node_fee.Attributes["amount"].Value, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                                        wHtmlbody += html_p("　　【納付金額】　　　" + Strings.StrConv(node_fee.Attributes["amount"].Value, VbStrConv.Wide, 0x411));
                                     }
                                 }
                                 break;
@@ -972,14 +1085,14 @@ namespace JpoApi
                         case "drawings":
                             if (a_item_of_amendment == "全図")
                             {
-                                wHtmlbody += "　　【書類名】図面<br />\r\n";
+                                wHtmlbody += html_p("　　【書類名】図面");
                                 a_item_of_amendment = "";
                             }
                             wHtmlbody += drawings(node2, xmlNsManager, a_item_of_amendment);
                             break;
                         case "figure":
-                            wHtmlbody += "　　【図" + Strings.StrConv(node2.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】<br />\r\n";
-                            wHtmlbody += "" + p2html(node2) + " <br />\r\n";
+                            wHtmlbody += html_p("　　【図" + Strings.StrConv(node2.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】");
+                            wHtmlbody += html_p(p2html(node2));
                             break;
                     }
                 }
@@ -1077,7 +1190,7 @@ namespace JpoApi
                             wHtmlbody += submission_date(node, xmlNsManager);
                             break;
                         case "addressed-to-person":
-                            wHtmlbody += "【あて先】　　　　　　" + node.InnerText + "<br />\r\n";
+                            wHtmlbody += html_p("【あて先】　　　　　　" + node.InnerText);
                             break;
                         case "indication-of-case-article":
                             wHtmlbody += indication_of_case_article(node, xmlNsManager);
@@ -1089,25 +1202,16 @@ namespace JpoApi
                             wHtmlbody += agents(node, xmlNsManager, "代理人");
                             break;
                         case "dispatch-number":
-                            wHtmlbody += "【発送番号】　　　　　" + Strings.StrConv(node.InnerText, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                            wHtmlbody += html_p("【発送番号】　　　　　" + Strings.StrConv(node.InnerText, VbStrConv.Wide, 0x411));
                             break;
                         case "opinion-contents-article":
                             wHtmlbody += opinion_contents_article(node, xmlNsManager);
-                            /*
-                            wHtmlbody += "【意見の内容】<br />\r\n";
-                            foreach (XmlNode node_p in node.SelectNodes("p", xmlNsManager))
-                            {
-                                wHtmlbody += "" + p2html(node_p) + "<br />\r\n";
-                            }
-                            */
                             break;
                         case "proof-means":
                             wHtmlbody += proof_means(node, xmlNsManager);
-                            //wHtmlbody += "【証拠方法】　　　　　" + p2html(node) + "<br />\r\n";
                             break;
                         case "dtext":
                             wHtmlbody += dtext(node, xmlNsManager);
-                            //wHtmlbody += "【その他】　　　　　　" + p2html(node) + "<br />\r\n";
                             break;
 
                         default:
@@ -1127,13 +1231,13 @@ namespace JpoApi
         {
             try
             {
-                string wHtmlbody = "【意見の内容】<br />\r\n";
+                string wHtmlbody = html_p("【意見の内容】");
                 foreach (XmlNode node2 in node.ChildNodes)
                 {
                     switch (node2.LocalName)
                     {
                         case "p":
-                            wHtmlbody += p2html(node2) + " <br />\r\n";
+                            wHtmlbody += html_p(p2html(node2));
                             break;
                     }
                 }
@@ -1156,7 +1260,7 @@ namespace JpoApi
                     switch (node2.LocalName)
                     {
                         case "p":
-                            wHtmlbody += wItemName + p2html(node2) + " <br />\r\n";
+                            wHtmlbody += html_p(wItemName + p2html(node2));
                             wItemName = "";
                             break;
                     }
@@ -1180,7 +1284,7 @@ namespace JpoApi
                     switch (node2.LocalName)
                     {
                         case "p":
-                            wHtmlbody += wItemName + p2html(node2) + " <br />\r\n";
+                            wHtmlbody += html_p(wItemName + p2html(node2));
                             wItemName = "";
                             break;
                     }
@@ -1212,37 +1316,37 @@ namespace JpoApi
                 XmlNode node_registered_number = node_addressbook.SelectSingleNode("jp:registered-number", xmlNsManager);
                 if(node_registered_number != null)
                 {
-                    wHtmlbody += "　　【識別番号】　　　" + Strings.StrConv(node_registered_number.InnerText, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                    wHtmlbody += html_p("　　【識別番号】　　　" + Strings.StrConv(node_registered_number.InnerText, VbStrConv.Wide, 0x411));
                 }
                 XmlNode attorney = node_addressbook.ParentNode.SelectSingleNode("jp:attorney", xmlNsManager);
                 if (attorney != null)
                 {
-                    wHtmlbody += "　　【弁理士】<br />\r\n";
+                    wHtmlbody += html_p("　　【弁理士】");
                 }
                 XmlNode lawyer = node_addressbook.ParentNode.SelectSingleNode("jp:lawyer", xmlNsManager);
                 if (lawyer != null)
                 {
-                    wHtmlbody += "　　【弁護士】<br />\r\n";
+                    wHtmlbody += html_p("　　【弁護士】");
                 }
                 XmlNode node_address_text = node_addressbook.SelectSingleNode("jp:address/jp:text", xmlNsManager);
                 if (node_address_text != null)
                 {
-                    wHtmlbody += "　　【住所又は居所】　" + node_address_text.InnerText + "<br />\r\n";
+                    wHtmlbody += html_p("　　【住所又は居所】　" + node_address_text.InnerText);
                 }
                 XmlNode node_name = node_addressbook.SelectSingleNode("jp:name", xmlNsManager);
                 if (node_name != null)
                 {
-                    wHtmlbody += "　　【氏名又は名称】　" + node_name.InnerText + "<br />\r\n";
+                    wHtmlbody += html_p("　　【氏名又は名称】　" + node_name.InnerText);
                 }
                 XmlNode node_phone = node_addressbook.SelectSingleNode("jp:phone", xmlNsManager);
                 if (node_phone != null)
                 {
-                    wHtmlbody += "　　【電話番号】　　　" + Strings.StrConv(node_phone.InnerText, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                    wHtmlbody += html_p("　　【電話番号】　　　" + Strings.StrConv(node_phone.InnerText, VbStrConv.Wide, 0x411));
                 }
                 XmlNode node_fax = node_addressbook.SelectSingleNode("jp:fax", xmlNsManager);
                 if (node_fax != null)
                 {
-                    wHtmlbody += "　　【ファクシミリ番号】　　　" + Strings.StrConv(node_fax.InnerText, VbStrConv.Wide, 0x411) + "<br />\r\n";
+                    wHtmlbody += html_p("　　【ファクシミリ番号】　　　" + Strings.StrConv(node_fax.InnerText, VbStrConv.Wide, 0x411));
                 }
                 return wHtmlbody;
             }
@@ -1291,10 +1395,10 @@ namespace JpoApi
                     switch (node.LocalName)
                     {
                         case "document-name":
-                            wHtmlbody += "　【書類名】　　　　" + node.InnerText + "<br />\r\n";
+                            wHtmlbody += html_p("　【書類名】　　　　" + node.InnerText);
                             break;
                         case "p":
-                            wHtmlbody += "" + p2html(node) + "<br />\r\n";
+                            wHtmlbody += html_p(p2html(node));
                             break;
                         default:
                             break;
@@ -1655,14 +1759,19 @@ namespace JpoApi
             try
             {
                 m_title = title_notice_pat_exam(node_notice_pat_exam, xmlNsManager);
-                string wHtmlbody = "<html><head>";
-                wHtmlbody += "<title>" + m_title + "</title>";
-                wHtmlbody += "<meta charset=\"shift_jis\"></head><body><div><font face=\"ＭＳ明朝\"><p>\r\n";
+                string wHtmlbody = "<html>";
+                wHtmlbody += html_head(m_title);
+
+                //wHtmlbody += "<title>" + m_title + "</title>";
+                //wHtmlbody += "<meta charset=\"shift_jis\"></head><body><div><font face=\"ＭＳ明朝\"><p>\r\n";
+                string wHtmlbody2 = "";
                 foreach (XmlNode node2 in node_notice_pat_exam.ChildNodes)
                 {
-                    wHtmlbody += notice_pat_exam(node2, xmlNsManager);
+                    wHtmlbody2 += notice_pat_exam(node2, xmlNsManager);
                 }
-                wHtmlbody += "</p></font></div></body></html>\r\n";
+                //wHtmlbody += "</p></font></div></body></html>\r\n";
+                wHtmlbody += html_body(wHtmlbody2);
+                wHtmlbody += "</html>\r\n";
                 return wHtmlbody;
             }
             catch (Exception ex)
@@ -1712,35 +1821,56 @@ namespace JpoApi
                     switch (node.LocalName)
                     {
                         case "document-name":
-                            wHtmlbody += "" + centering(node.InnerText) + "<br />\r\n";
+                            wHtmlbody += html_p(centering(node.InnerText));
                             break;
                         case "bibliog-in-ntc-pat-exam":
-                            wHtmlbody += "<br />\r\n<br />\r\n<br /><br />\r\n";
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
                             wHtmlbody += bibliog_in_ntc_pat_exam(node, xmlNsManager);
                             break;
                         case "conclusion-part-article":
                             {
-                                wHtmlbody += "<br />\r\n<br />\r\n<br /><br />\r\n";
+                                wHtmlbody += html_p("");
+                                wHtmlbody += html_p("");
+                                wHtmlbody += html_p("");
+                                wHtmlbody += html_p("");
                                 foreach (XmlNode node2 in node.SelectNodes("p", xmlNsManager))
                                 {
-                                    wHtmlbody += p2html(node2) + "<br />\r\n";
+                                    wHtmlbody += html_p(p2html(node2));
                                 }
                             }
                             break;
                         case "drafting-body":
-                            wHtmlbody += "<br />\r\n<br />\r\n<br /><br />\r\n";
-                            wHtmlbody += p2html(node) + "<br />\r\n";
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            foreach (XmlNode node2 in node.SelectNodes("p", xmlNsManager))
+                            {
+                                wHtmlbody += html_p(p2html(node2));
+                            }
                             break;
                         case "footer-article":
-                            wHtmlbody += "<br />\r\n<br />\r\n<br /><br />\r\n";
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
                             wHtmlbody += footer_article(node, xmlNsManager);
                             break;
                         case "final-decision-group":
-                            wHtmlbody += "<br />\r\n<br />\r\n<br /><br />\r\n";
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
                             wHtmlbody += final_decision_group(node, xmlNsManager);
                             break;
                         case "final-decision-memo":
-                            wHtmlbody += "<br />\r\n<br />\r\n<br /><br />\r\n";
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
                             wHtmlbody += final_decision_memo(node, xmlNsManager);
                             break;
                         default:
@@ -1765,7 +1895,7 @@ namespace JpoApi
                 switch (node.LocalName)
                 {
                     case "document-name":
-                        wHtmlbody += "　　　　　　　　　　　　" + node.InnerText + "<br />\r\n";
+                        wHtmlbody += html_p("　　　　　　　　　　　　" + node.InnerText);
                         break;
                     case "final-decision-bibliog":
                         XmlNode node_doc_number = node.SelectSingleNode("//jp:application-reference/jp:document-id/jp:doc-number", xmlNsManager);
@@ -1773,15 +1903,21 @@ namespace JpoApi
                         {
                             string docNumber = node_doc_number.InnerText.Substring(0, 4) + "-" + node_doc_number.InnerText.Substring(4, 6);
                             docNumber = Strings.StrConv(docNumber, VbStrConv.Wide, 0x411);
-
-                            wHtmlbody += "<br />\r\n<br />\r\n<br /><br />\r\n";
-                            wHtmlbody += "　特許出願の番号　　　　　　特願" + docNumber + "<br />\r\n";
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("");
+                            wHtmlbody += html_p("　特許出願の番号　　　　　　特願" + docNumber);
                         }
                         break;
                     case "final-decision-body":
-                        wHtmlbody += "<br />\r\n<br />\r\n<br /><br />\r\n";
-                        wHtmlbody += "１．調査した分野（ＩＰＣ，ＤＢ名）<br />\r\n";
-                        wHtmlbody += "<br />\r\n<br />\r\n";
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("１．調査した分野（ＩＰＣ，ＤＢ名）");
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("");
                         foreach (XmlNode node2 in node.ChildNodes)
                         {
                             switch(node2.LocalName)
@@ -1791,27 +1927,34 @@ namespace JpoApi
                                     {
                                         if (node3.LocalName == "field-of-search")
                                         {
-                                            wHtmlbody += "　" + node3.InnerText + "<br />\r\n";
+                                            wHtmlbody += html_p("　" + node3.InnerText);
                                         }
                                     }
                                     break;
                                 case "patent-reference-article":
-                                    wHtmlbody += "<br />\r\n<br />\r\n<br /><br />\r\n";
-                                    wHtmlbody += "２．参考特許文献<br />\r\n";
-                                    wHtmlbody += "<br />\r\n<br />\r\n";
+                                    wHtmlbody += html_p("");
+                                    wHtmlbody += html_p("");
+                                    wHtmlbody += html_p("");
+                                    wHtmlbody += html_p("");
+                                    wHtmlbody += html_p("２．参考特許文献");
+                                    wHtmlbody += html_p("");
+                                    wHtmlbody += html_p("");
                                     foreach (XmlNode node3 in node2.ChildNodes)
                                     {
                                         if (node3.LocalName == "patent-reference-group")
                                         {
+                                            string szLine = "";
                                             foreach (XmlNode node4 in node3.ChildNodes)
                                             {
                                                 switch (node4.LocalName)
                                                 {
                                                     case "document-number":
-                                                        wHtmlbody += "　" + (node4.InnerText + "　　　　　　　　　　　　　　　　　　　　　　　　　　").Substring(0, 26);
+                                                        szLine = "　" + (node4.InnerText + "　　　　　　　　　　　　　　　　　　　　　　　　　　").Substring(0, 26);
                                                         break;
                                                     case "kind-of-document":
-                                                        wHtmlbody += node4.InnerText + "<br />\r\n";
+                                                        szLine += node4.InnerText;
+                                                        wHtmlbody += html_p(szLine);
+                                                        szLine = "";
                                                         break;
                                                 }
                                             }
@@ -1822,9 +1965,13 @@ namespace JpoApi
                         }
                         break;
                     case "reference-books-article":
-                        wHtmlbody += "<br />\r\n<br />\r\n<br /><br />\r\n";
-                        wHtmlbody += "３．参考図書雑誌<br />\r\n";
-                        wHtmlbody += "<br />\r\n";
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("３．参考図書雑誌");
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("");
                         break;
                     default:
                         break;
@@ -1837,51 +1984,57 @@ namespace JpoApi
         private string final_decision_group(XmlNode node_footer_article, XmlNamespaceManager xmlNsManager)
         {
             string wHtmlbody = "";
+            string szLine = "";
 
             foreach (XmlNode node in node_footer_article.ChildNodes)
             {
                 switch (node.LocalName)
                 {
                     case "kind-of-application":
-                        wHtmlbody += "１．出願種別　　　　　　　　" + node.InnerText + "<br />\r\n";
+                        wHtmlbody += html_p("１．出願種別　　　　　　　　" + node.InnerText);
                         break;
                     case "exist-of-reference-doc":
-                        wHtmlbody += "２．参考文献　　　　　　　　";
+                        szLine += "２．参考文献　　　　　　　　";
                         if (node.Attributes["jp:true-or-false"].Value == "true")
                         {
-                            wHtmlbody += "有<br />\r\n";
+                            szLine += "有";
                         }
                         else
                         {
-                            wHtmlbody += "無<br />\r\n";
+                            szLine += "無";
                         }
+                        wHtmlbody += html_p(szLine);
                         break;
                     case "patent-law-section30":
-                        wHtmlbody += "３．特許法第３０条適用　　　";
+                        szLine += "３．特許法第３０条適用　　　";
                         if (node.Attributes["jp:true-or-false"].Value == "true")
                         {
-                            wHtmlbody += "有<br />\r\n";
+                            szLine += "有";
                         }
                         else
                         {
-                            wHtmlbody += "無<br />\r\n";
+                            szLine += "無";
                         }
+                        wHtmlbody += html_p(szLine);
                         break;
                     case "change-flag-invention-title":
-                        wHtmlbody += "４．発明の名称の変更　　　　";
+                        szLine += "４．発明の名称の変更　　　　";
                         if (node.Attributes["jp:true-or-false"].Value == "true")
                         {
-                            wHtmlbody += "有<br />\r\n";
+                            szLine += "有";
                         }
                         else
                         {
-                            wHtmlbody += "無<br />\r\n";
+                            szLine += "無";
                         }
+                        wHtmlbody += html_p(szLine);
                         break;
                     case "ipc-article":
-                        wHtmlbody += "<br />\r\n<br />\r\n";
-                        wHtmlbody += "５．国際特許分類（ＩＰＣ）<br />\r\n";
-                        wHtmlbody += "<br />\r\n<br />\r\n";
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("５．国際特許分類（ＩＰＣ）");
+                        wHtmlbody += html_p("");
+                        wHtmlbody += html_p("");
                         foreach (XmlNode node2 in node.ChildNodes)
                         {
                             switch (node2.LocalName)
@@ -1889,7 +2042,7 @@ namespace JpoApi
                                 case "ipc":
                                     string ipc = node2.InnerText.Replace("\xA0", " ");
                                     ipc = Strings.StrConv(ipc, VbStrConv.Wide, 0x411);
-                                    wHtmlbody += "　　　　　　　　　　　　　　　" + ipc + "<br />\r\n";
+                                    wHtmlbody += html_p("　　　　　　　　　　　　　　　" + ipc);
                                     break;
                             }
                         }
@@ -1970,8 +2123,7 @@ namespace JpoApi
             }
             for (int i = 0; i< 4; i++)
             {
-                footer[i] += "<br />\r\n";
-                wHtmlbody += footer[i];
+                wHtmlbody += html_p(footer[i]);
             }
             return wHtmlbody;
         }
@@ -1990,13 +2142,13 @@ namespace JpoApi
                             XmlNode node_doc_number = node.SelectSingleNode("jp:document-id/jp:doc-number", xmlNsManager);
                             {
                                 string doc_number = Strings.StrConv(node_doc_number.InnerText, VbStrConv.Wide, 0x411);
-                                wHtmlbody += "　特許出願の番号　　　　　　特願" + doc_number.Substring(0, 4) + "－" + doc_number.Substring(4) + "<br />\r\n";
+                                wHtmlbody += html_p("　特許出願の番号　　　　　　特願" + doc_number.Substring(0, 4) + "－" + doc_number.Substring(4));
                             }
                             break;
                         case "drafting-date":
                             XmlNode node_drafting_date = node.SelectSingleNode("jp:date", xmlNsManager);
                             {
-                                wHtmlbody += "　起案日　　　　　　　　　　" + ad2jpCalender(node_drafting_date.InnerText) + "<br />\r\n";
+                                wHtmlbody += html_p("　起案日　　　　　　　　　　" + ad2jpCalender(node_drafting_date.InnerText));
                             }
                             break;
                         case "draft-person-group":
@@ -2017,17 +2169,17 @@ namespace JpoApi
                                     {
                                         office_code = Strings.StrConv(node_office_code.InnerText, VbStrConv.Wide, 0x411);
                                     }
-                                    wHtmlbody += "　特許庁審査官　　　　　　　" + name + "　　　　　　　　" + staff_code + "　" + office_code + "<br />\r\n";
+                                    wHtmlbody += html_p("　特許庁審査官　　　　　　　" + name + "　　　　　　　　" + staff_code + "　" + office_code);
                                 }
                             }
                             break;
                         case "invention-title":
-                            wHtmlbody += "　発明の名称　　　　　　　　" + node.InnerText + "<br />\r\n";
+                            wHtmlbody += html_p("　発明の名称　　　　　　　　" + node.InnerText);
                             break;
                         case "number-of-claim":
                             string numberOfClaim = node.InnerText.Replace("\xA0"," ");
                             numberOfClaim = Strings.StrConv(numberOfClaim, VbStrConv.Wide, 0x411);
-                            wHtmlbody += "　請求項の数　　　　　　　　" + numberOfClaim + "<br />\r\n";
+                            wHtmlbody += html_p("　請求項の数　　　　　　　　" + numberOfClaim);
                             break;
                         case "addressed-to-person-group":
                             if(node.Attributes["jp:kind-of-person"].Value == "applicant")
@@ -2035,7 +2187,7 @@ namespace JpoApi
                                 XmlNode node_name = node.SelectSingleNode("jp:addressbook/jp:name", xmlNsManager);
                                 if(node_name != null)
                                 {
-                                    wHtmlbody += "　特許出願人　　　　　　　　" + node_name.InnerText + "<br />\r\n";
+                                    wHtmlbody += html_p("　特許出願人　　　　　　　　" + node_name.InnerText);
                                 }
                             } else
                             if (node.Attributes["jp:kind-of-person"].Value == "attorney")
@@ -2043,7 +2195,7 @@ namespace JpoApi
                                 XmlNode node_name = node.SelectSingleNode("jp:addressbook/jp:name", xmlNsManager);
                                 if (node_name != null)
                                 {
-                                    wHtmlbody += "　代理人　　　　　　　　　　" + node_name.InnerText + "<br />\r\n";
+                                    wHtmlbody += html_p("　代理人　　　　　　　　　　" + node_name.InnerText);
                                 }
                             }
                             break;
@@ -2060,7 +2212,7 @@ namespace JpoApi
                                     article += "、" + node_article.InnerText;
                                 }
                             }
-                            wHtmlbody += "　適用条文　　　　　　　　　" + article + "<br />\r\n";
+                            wHtmlbody += html_p("　適用条文　　　　　　　　　" + article);
                             break;
                         default:
                             break;
@@ -2106,7 +2258,9 @@ namespace JpoApi
                         wHtmlbody += "\r\n　　【図" + Strings.StrConv(node.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】" + node.OuterXml + "<br />\r\n";
                         break;
                     case "#text":
-                        wHtmlbody += HttpUtility.HtmlEncode(node.OuterXml);
+                        string szText = HttpUtility.HtmlEncode(node.OuterXml);
+                        szText = szText.Replace("&#160;", "&#32;");
+                        wHtmlbody += szText;
                         break;
                     default:
                         wHtmlbody += node.OuterXml;
@@ -2128,8 +2282,7 @@ namespace JpoApi
             string w_src0 = m_dirName + @"\" + node.Attributes["file"].Value;
             System.Drawing.Image img = System.Drawing.Bitmap.FromFile(w_src0);
             img.Save(w_src1, System.Drawing.Imaging.ImageFormat.Png);
-            //wHtmlbody += "<img height=" + height.ToString() + " width=" + width.ToString() + " src=\"" + w_src_png + "\"><br />\r\n";
-            byte[] dataPng = File.ReadAllBytes(w_src1);
+            byte[] dataPng = System.IO.File.ReadAllBytes(w_src1);
             string base64Png = Convert.ToBase64String(dataPng);
             wHtmlbody += "<img height=" + height.ToString() + " width=" + width.ToString() + " src=\"data:image/png;base64," + base64Png + "\"><br />\r\n";
             return wHtmlbody;

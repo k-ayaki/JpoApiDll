@@ -33,7 +33,7 @@ namespace testAppDocContRefusalReasonDecision
                         Console.WriteLine(f);
 
                         string curDir = System.IO.Directory.GetCurrentDirectory();
-                        Xml2Word xml2Word = new Xml2Word(f, docNumber, curDir);
+                        Xml2Word xml2Word = new Xml2Word(f, docNumber, curDir, 20, 15, 30, 25);
                     }
                 }
             }

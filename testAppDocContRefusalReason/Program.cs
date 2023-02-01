@@ -18,8 +18,9 @@ namespace testAppDocContRefusalReason
 
             Console.WriteLine("■拒絶理由通知実体情報取得");
 
-            string[] docNumbers = { "2010002165", "2006106644", "2014060127", "2014089742" };
-            foreach(string docNumber in docNumbers)
+            //            string[] docNumbers = { "2020000001", "2010002165", "2006106644", "2014060127", "2014089742" };
+            string[] docNumbers = { "2012000313" };
+            foreach (string docNumber in docNumbers)
             {
                 using (AppDocContRefusalReason tj5 = new AppDocContRefusalReason(docNumber, at.m_access_token.access_token))
                 {
@@ -37,7 +38,7 @@ namespace testAppDocContRefusalReason
                             Console.WriteLine(f);
 
                             string curDir = System.IO.Directory.GetCurrentDirectory();
-                            Xml2Word xml2word = new Xml2Word(f, docNumber, curDir);
+                            Xml2Word xml2word = new Xml2Word(f, docNumber, curDir, 20,15,30,25);
                         }
                     }
                 }
