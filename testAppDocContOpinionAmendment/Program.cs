@@ -19,7 +19,7 @@ namespace testAppDocContOpinionAmendment
             string curDir = System.IO.Directory.GetCurrentDirectory();
 
             //string[] docNumbers = new string[] { "2015515485", "2012193763", "2012199157", "2015532525", "2015539540", "2015515940", "2015550024", "2012001505", "2012019353", "2009004798", "2006106644" };
-            string[] docNumbers = new string[] { "2023000001" };
+            string[] docNumbers = new string[] { "2015515485" };
             foreach (string docNumber in docNumbers)
             {
                 AppDocContOpinionAmendment tj5 = new AppDocContOpinionAmendment(docNumber, at.m_access_token.access_token);

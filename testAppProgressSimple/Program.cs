@@ -38,6 +38,9 @@ namespace testAppProgressSimple
                 Console.WriteLine("公開日：" + tj4.m_data.publicationDate);
                 Console.WriteLine("登録番号：" + tj4.m_data.registrationNumber);
                 Console.WriteLine("登録日：" + tj4.m_data.registrationDate);
+                Console.WriteLine("国際出願番号：" + tj4.m_data.internationalApplicationNumber);
+                Console.WriteLine("国際公開番号：" + tj4.m_data.internationalPublicationNumber);
+                Console.WriteLine("国際公開日：" + tj4.m_data.internationalPublicationDate);
                 Console.WriteLine("抹消識別：" + tj4.m_data.erasureIdentifier);
                 Console.WriteLine("存続期間満了年月日：" + tj4.m_data.expireDate);
                 Console.WriteLine("本権利消滅日：" + tj4.m_data.disappearanceDate);

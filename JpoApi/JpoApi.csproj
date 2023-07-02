@@ -79,13 +79,17 @@
     <Compile Include="ApplicantAttorneyCd.cs" />
     <Compile Include="AppProgress.cs" />
     <Compile Include="AppProgressSimple.cs" />
+    <Compile Include="Cache.cs" />
+    <Compile Include="CacheDocCont.cs" />
     <Compile Include="CaseNumberReference.cs" />
     <Compile Include="CiteDocInfo.cs" />
     <Compile Include="DivisionalAppInfo.cs" />
     <Compile Include="Html2Word.cs" />
     <Compile Include="InpitRss.cs" />
     <Compile Include="JpoHttp.cs" />
+    <Compile Include="JppFixedAddress.cs" />
     <Compile Include="NetworkState.cs" />
+    <Compile Include="PctNationalPhaseApplicationNumber.cs" />
     <Compile Include="PriorityRightAppInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -94,6 +98,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="RegistrationInfo.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Xml2Html.cs" />
     <Compile Include="Xml2Word.cs" />
   </ItemGroup>

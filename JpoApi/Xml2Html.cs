@@ -1196,7 +1196,7 @@ namespace JpoApi
                             wHtmlbody += indication_of_case_article(node, xmlNsManager);
                             break;
                         case "applicants":
-                            wHtmlbody += applicants(node, xmlNsManager, "出願人");
+                            wHtmlbody += applicants(node, xmlNsManager, "特許出願人");
                             break;
                         case "agents":
                             wHtmlbody += agents(node, xmlNsManager, "代理人");

@@ -14,8 +14,8 @@ namespace testAppProgress
             Account ac = new Account();
             AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path);
 
-            AppProgress tj4 = new AppProgress("2016045210", at.m_access_token.access_token);
-            Console.WriteLine("■特許経過情報取得　2016045210");
+            AppProgress tj4 = new AppProgress("2014560038", at.m_access_token.access_token);
+            Console.WriteLine("■特許経過情報取得　2014560038");
             Console.WriteLine("ステータスコード：" + tj4.m_result.statusCode);
             Console.WriteLine("エラーメッセージ：" + tj4.m_result.errorMessage);
             Console.WriteLine("残アクセス数：" + tj4.m_result.remainAccessCount);
@@ -38,6 +38,9 @@ namespace testAppProgress
                 Console.WriteLine("公開日：" + tj4.m_data.publicationDate);
                 Console.WriteLine("登録番号：" + tj4.m_data.registrationNumber);
                 Console.WriteLine("登録日：" + tj4.m_data.registrationDate);
+                Console.WriteLine("国際出願番号：" + tj4.m_data.internationalApplicationNumber);
+                Console.WriteLine("国際公開番号：" + tj4.m_data.internationalPublicationNumber);
+                Console.WriteLine("国際公開日：" + tj4.m_data.internationalPublicationDate);
                 Console.WriteLine("抹消識別：" + tj4.m_data.erasureIdentifier);
                 Console.WriteLine("存続期間満了年月日：" + tj4.m_data.expireDate);
                 Console.WriteLine("本権利消滅日：" + tj4.m_data.disappearanceDate);
@@ -65,6 +68,8 @@ namespace testAppProgress
                     Console.WriteLine("\t公表番号：" + tj4.m_data.divisionalApplicationInformation[i].nationalPublicationNumber);
                     Console.WriteLine("\t公表番号（西暦変換）：" + tj4.m_data.divisionalApplicationInformation[i].ADNationalPublicationNumber);
                     Console.WriteLine("\t登録番号：" + tj4.m_data.divisionalApplicationInformation[i].registrationNumber);
+                    Console.WriteLine("\t国際出願番号：" + tj4.m_data.divisionalApplicationInformation[i].internationalApplicationNumber);
+                    Console.WriteLine("\t国際公開番号：" + tj4.m_data.divisionalApplicationInformation[i].internationalPublicationNumber);
                     Console.WriteLine("\t抹消識別：" + tj4.m_data.divisionalApplicationInformation[i].erasureIdentifier);
                     Console.WriteLine("\t存続期間満了年月日：" + tj4.m_data.divisionalApplicationInformation[i].expireDate);
                     Console.WriteLine("\t本権利消滅日：" + tj4.m_data.divisionalApplicationInformation[i].disappearanceDate);

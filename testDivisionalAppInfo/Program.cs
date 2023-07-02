@@ -35,6 +35,8 @@ namespace testDivisionalAppInfo
                     Console.WriteLine("\t公表番号：" + tj4.m_data.divisionalApplicationInformation[i].nationalPublicationNumber);
                     Console.WriteLine("\t公表番号（西暦変換）：" + tj4.m_data.divisionalApplicationInformation[i].ADNationalPublicationNumber);
                     Console.WriteLine("\t登録番号：" + tj4.m_data.divisionalApplicationInformation[i].registrationNumber);
+                    Console.WriteLine("\t国際出願番号：" + tj4.m_data.divisionalApplicationInformation[i].internationalApplicationNumber);
+                    Console.WriteLine("\t国際公開番号：" + tj4.m_data.divisionalApplicationInformation[i].internationalPublicationNumber);
                     Console.WriteLine("\t抹消識別：" + tj4.m_data.divisionalApplicationInformation[i].erasureIdentifier);
                     Console.WriteLine("\t存続期間満了年月日：" + tj4.m_data.divisionalApplicationInformation[i].expireDate);
                     Console.WriteLine("\t本権利消滅日：" + tj4.m_data.divisionalApplicationInformation[i].disappearanceDate);
