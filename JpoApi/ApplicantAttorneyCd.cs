@@ -29,9 +29,7 @@ namespace JpoApi
         public readonly int e_CACHE = 0x00000020;
         public readonly int e_ACCOUNT = 0x00000040;
 
-        //public string m_cacheDir { get; set; }
         public CData m_data { get; set; }
-        //public CResult m_cache_result { get; set; }     // APIキャッシュの結果
         public CResult m_result { get; set; }           // APIの結果
 
         private string m_result_json = "{\r\n  \"result\": {\r\n    \"statusCode\": \"\",\r\n    \"errorMessage\": \"\",\r\n    \"remainAccessCount\": \"\"\r\n  }\r\n}\r\n";

@@ -16,8 +16,7 @@ using DocumentFormat.OpenXml;
 
 namespace JpoApi
 {
-    // 特許申請書類
-    public class AppDocContOpinionAmendment : IDisposable
+    public class TrademarkAppDocContOpinionAmendment : IDisposable
     {
         private bool disposedValue;
         public int m_error { get; set; }
@@ -27,7 +26,7 @@ namespace JpoApi
         public readonly int e_TIMEOVER = 0x00000004;
         public readonly int e_CONTENT = 0x00000008;
         public readonly int e_ZIPFILE = 0x00000010;
-        public readonly int e_CACHE =   0x00000020;
+        public readonly int e_CACHE = 0x00000020;
         public readonly int e_ACCOUNT = 0x00000040;
         public string m_zipFile { get; set; }
         public string m_extractPath { get; set; }
@@ -49,7 +48,7 @@ namespace JpoApi
             public CResult result { get; set; }
         }
 
-        public AppDocContOpinionAmendment(string applicationNumber, string a_access_token)
+        public TrademarkAppDocContOpinionAmendment(string applicationNumber, string a_access_token)
         {
             try
             {
@@ -57,8 +56,8 @@ namespace JpoApi
                 this.m_result = JsonConvert.DeserializeObject<CResult>(m_result_json);
 
                 CacheDocCont docCont = new CacheDocCont(a_access_token);
-                docCont.GetZipXml("api/patent/v1/app_doc_cont_opinion_amendment/" + applicationNumber);
-                if(docCont.m_json.Length != 0)
+                docCont.GetZipXml("api/trademark/v1/app_doc_cont_opinion_amendment/" + applicationNumber);
+                if (docCont.m_json.Length != 0)
                 {
                     this.m_json = docCont.m_json;
                     CJpo cjpo = JsonConvert.DeserializeObject<CJpo>(this.m_json);

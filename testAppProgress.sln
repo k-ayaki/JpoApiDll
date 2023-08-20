@@ -37,6 +37,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testJppFixedAddress", "test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testPctNationalPhaseApplicationNumber", "testPctNationalPhaseApplicationNumber\testPctNationalPhaseApplicationNumber.csproj", "{3A819F6B-8030-463D-AD96-1D906BD3D6AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testTrademarkAppDocContOpinionAmendment", "testTrademarkAppDocContOpinionAmendment\testTrademarkAppDocContOpinionAmendment.csproj", "{15F521CB-29ED-48D4-8C78-1FB721008F7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testTrademarkAppDocContRefusalReason", "testTrademarkAppDocContRefusalReason\testTrademarkAppDocContRefusalReason.csproj", "{818C2265-0E25-4996-A3A1-460B80851B81}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testTrademarkAppDocContRefusalReasonDecision", "testTrademarkAppDocContRefusalReasonDecision\testTrademarkAppDocContRefusalReasonDecision.csproj", "{00FA7228-703B-4DC6-BDF3-46302207AF20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +117,18 @@ Global
 		{3A819F6B-8030-463D-AD96-1D906BD3D6AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A819F6B-8030-463D-AD96-1D906BD3D6AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A819F6B-8030-463D-AD96-1D906BD3D6AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15F521CB-29ED-48D4-8C78-1FB721008F7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15F521CB-29ED-48D4-8C78-1FB721008F7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15F521CB-29ED-48D4-8C78-1FB721008F7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15F521CB-29ED-48D4-8C78-1FB721008F7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{818C2265-0E25-4996-A3A1-460B80851B81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{818C2265-0E25-4996-A3A1-460B80851B81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{818C2265-0E25-4996-A3A1-460B80851B81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{818C2265-0E25-4996-A3A1-460B80851B81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00FA7228-703B-4DC6-BDF3-46302207AF20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00FA7228-703B-4DC6-BDF3-46302207AF20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00FA7228-703B-4DC6-BDF3-46302207AF20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00FA7228-703B-4DC6-BDF3-46302207AF20}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -99,6 +99,9 @@
     </Compile>
     <Compile Include="RegistrationInfo.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="TrademarkAppDocContOpinionAmendment.cs" />
+    <Compile Include="TrademarkAppDocContRefusalReason.cs" />
+    <Compile Include="TrademarkAppDocContRefusalReasonDecision.cs" />
     <Compile Include="Xml2Html.cs" />
     <Compile Include="Xml2Word.cs" />
   </ItemGroup>

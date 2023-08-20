@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace JpoApi
 {
@@ -28,6 +29,7 @@ namespace JpoApi
 
         private string m_result_json = "{\r\n  \"result\": {\r\n    \"statusCode\": \"\",\r\n    \"errorMessage\": \"\",\r\n    \"remainAccessCount\": \"\"\r\n  }\r\n}\r\n";
         public IEnumerable<string> m_files { get; set; }
+
         public class CResult
         {
             public string statusCode { get; set; }      // ステータスコード
@@ -39,7 +41,6 @@ namespace JpoApi
         {
             public CResult result { get; set; }
         }
-        public string m_jsonFilePath { get; set; }
         public string m_zipFile { get; set; }
         public string m_extractPath { get; set; }
         public string m_json { get; set; }

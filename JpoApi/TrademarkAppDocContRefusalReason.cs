@@ -11,13 +11,10 @@ using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Web.UI.WebControls;
-using System.Xml;
-using DocumentFormat.OpenXml;
 
 namespace JpoApi
 {
-    // 特許申請書類
-    public class AppDocContOpinionAmendment : IDisposable
+    public class TrademarkAppDocContRefusalReason : IDisposable
     {
         private bool disposedValue;
         public int m_error { get; set; }
@@ -27,29 +24,29 @@ namespace JpoApi
         public readonly int e_TIMEOVER = 0x00000004;
         public readonly int e_CONTENT = 0x00000008;
         public readonly int e_ZIPFILE = 0x00000010;
-        public readonly int e_CACHE =   0x00000020;
+        public readonly int e_CACHE = 0x00000020;
         public readonly int e_ACCOUNT = 0x00000040;
-        public string m_zipFile { get; set; }
-        public string m_extractPath { get; set; }
         public string m_json { get; set; }
+        public string m_zipFile { get; set; }
+        //public string m_jsonFile { get; set; }
+        public string m_extractPath { get; set; }
         public IEnumerable<string> m_files { get; set; }
-
-        public List<XmlDocument> xDocs = new List<XmlDocument>();
+        //public CResult m_cache_result { get; set; }     // APIキャッシュの結果
         public CResult m_result { get; set; }           // APIの結果
 
         private string m_result_json = "{\r\n  \"result\": {\r\n    \"statusCode\": \"\",\r\n    \"errorMessage\": \"\",\r\n    \"remainAccessCount\": \"\"\r\n  }\r\n}\r\n";
         public class CResult
         {
-            public string statusCode { get; set; }
-            public string errorMessage { get; set; }
-            public string remainAccessCount { get; set; }
+            public string statusCode { get; set; }          // ステータスコード
+            public string errorMessage { get; set; }        // エラーメッセージ
+            public string remainAccessCount { get; set; }   // 残アクセス数
         }
         private class CJpo
         {
             public CResult result { get; set; }
         }
 
-        public AppDocContOpinionAmendment(string applicationNumber, string a_access_token)
+        public TrademarkAppDocContRefusalReason(string applicationNumber, string a_access_token)
         {
             try
             {
@@ -57,8 +54,8 @@ namespace JpoApi
                 this.m_result = JsonConvert.DeserializeObject<CResult>(m_result_json);
 
                 CacheDocCont docCont = new CacheDocCont(a_access_token);
-                docCont.GetZipXml("api/patent/v1/app_doc_cont_opinion_amendment/" + applicationNumber);
-                if(docCont.m_json.Length != 0)
+                docCont.GetZipXml("api/trademark/v1/app_doc_cont_refusal_reason/" + applicationNumber);
+                if (docCont.m_json.Length != 0)
                 {
                     this.m_json = docCont.m_json;
                     CJpo cjpo = JsonConvert.DeserializeObject<CJpo>(this.m_json);
@@ -77,6 +74,7 @@ namespace JpoApi
                 ;
             }
         }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -93,7 +91,7 @@ namespace JpoApi
         }
 
         // // TODO: 'Dispose(bool disposing)' にアンマネージド リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします
-        // ~AppDocContOpinionAmendment()
+        // ~AppDocContRefusalReason()
         // {
         //     // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
         //     Dispose(disposing: false);

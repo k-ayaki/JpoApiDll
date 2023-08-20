@@ -14,16 +14,6 @@ using System.Web.Caching;
 using System.Security;
 using System.Xml.Linq;
 using System.Web;
-//using Microsoft.Office.Core;
-//using static System.Net.WebRequestMethods;
-//using System.Drawing.Printing;
-//using System.Reflection.Emit;
-//using System.Web.UI.WebControls;
-//using System.Web.UI;
-//using static System.Net.Mime.MediaTypeNames;
-//using System.Runtime.InteropServices;
-//using File = System.IO.File;
-//using Microsoft.Win32;
 
 namespace JpoApi
 {
