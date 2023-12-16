@@ -14,14 +14,45 @@ namespace testJppFixedAddress
             Account ac = new Account();
             AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path);
 
-            JppFixedAddress tj4 = new JppFixedAddress("2020008423", at.m_access_token.access_token);
+            JppFixedAddress tj = new JppFixedAddress("2020008423", at.m_access_token.access_token);
             Console.WriteLine("■特許J-PlatPat固定アドレス取得API　2020008423");
-            Console.WriteLine("ステータスコード：" + tj4.m_result.statusCode);
-            Console.WriteLine("エラーメッセージ：" + tj4.m_result.errorMessage);
-            Console.WriteLine("残アクセス数：" + tj4.m_result.remainAccessCount);
-            if (tj4.m_error == tj4.e_NONE)
+            if (tj.m_error == tj.e_NONE)
             {
-                Console.WriteLine("url：" + tj4.m_data.url);
+                Console.WriteLine("ステータスコード：" + tj.m_result.statusCode);
+                Console.WriteLine("エラーメッセージ：" + tj.m_result.errorMessage);
+                Console.WriteLine("残アクセス数：" + tj.m_result.remainAccessCount);
+                if (tj.m_data != null)
+                {
+                    Console.WriteLine("url：" + tj.m_data.url);
+                }
+            }
+            else if (tj.m_error == tj.e_NETWORK)
+            {
+                Console.WriteLine("\tネットワークエラーです。");
+            }
+            else if (tj.m_error == tj.e_SERVER)
+            {
+                Console.WriteLine("\tサーバエラーです。");
+            }
+            else if (tj.m_error == tj.e_TIMEOVER)
+            {
+                Console.WriteLine("\tタイムオーバーエラーです。");
+            }
+            else if (tj.m_error == tj.e_CONTENT)
+            {
+                Console.WriteLine("\t内容のエラーです。");
+            }
+            else if (tj.m_error == tj.e_ZIPFILE)
+            {
+                Console.WriteLine("\tZIPの解凍エラーです。");
+            }
+            else if (tj.m_error == tj.e_CACHE)
+            {
+                Console.WriteLine("\tキャッシュエラーです。");
+            }
+            else if (tj.m_error == tj.e_ACCOUNT)
+            {
+                Console.WriteLine("\tアカウントのエラーです。");
             }
             string t = Console.ReadLine();
         }

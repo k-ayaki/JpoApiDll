@@ -69,12 +69,12 @@ namespace JpoApi
 
         public Account()
         {
-            m_iniFileDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\ayaki\jpoapi";
-            if(Directory.Exists(m_iniFileDir)==false)
+            this.m_iniFileDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\ayaki\jpoapi";
+            if(Directory.Exists(this.m_iniFileDir)==false)
             {
-                Directory.CreateDirectory(m_iniFileDir);
+                Directory.CreateDirectory(this.m_iniFileDir);
             }
-            m_iniFilePath = m_iniFileDir +  @"\account.ini";
+            this.m_iniFilePath = m_iniFileDir +  @"\account.ini";
         }
         /// <summary>
         /// Ini ファイルから文字列を取得します。
@@ -86,7 +86,7 @@ namespace JpoApi
         public string GetString(string section, string key, string defaultValue = "")
         {
             var sb = new StringBuilder(1024);
-            var r = GetPrivateProfileString(section, key, defaultValue, sb, (uint)sb.Capacity, m_iniFilePath);
+            var r = GetPrivateProfileString(section, key, defaultValue, sb, (uint)sb.Capacity, this.m_iniFilePath);
             return sb.ToString();
         }
         /// <summary>
@@ -98,7 +98,7 @@ namespace JpoApi
         /// <returns></returns>
         public int GetInt(string section, string key, int defaultValue = 0)
         {
-            return (int)GetPrivateProfileInt(section, key, defaultValue, m_iniFilePath);
+            return (int)GetPrivateProfileInt(section, key, defaultValue, this.m_iniFilePath);
         }
         /// <summary>
         /// Ini ファイルに文字列を書き込みます。
@@ -109,7 +109,7 @@ namespace JpoApi
         /// <returns></returns>
         public bool WriteString(string section, string key, string value)
         {
-            return WritePrivateProfileString(section, key, value, m_iniFilePath);
+            return WritePrivateProfileString(section, key, value, this.m_iniFilePath);
         }
 
         protected virtual void Dispose(bool disposing)

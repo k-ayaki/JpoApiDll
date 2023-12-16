@@ -18,28 +18,56 @@ namespace testAppDocContRefusalReason
 
             Console.WriteLine("■拒絶理由通知実体情報取得");
 
-            //            string[] docNumbers = { "2020000001", "2010002165", "2006106644", "2014060127", "2014089742" };
-            string[] docNumbers = { "2012000313" };
+            //            string[] docNumbers = { "2012000313", "2020000001", "2010002165", "2006106644", "2014060127", "2014089742","2020162217" };
+            string[] docNumbers = { "2020162217" };
             foreach (string docNumber in docNumbers)
             {
-                using (AppDocContRefusalReason tj5 = new AppDocContRefusalReason(docNumber, at.m_access_token.access_token))
+                using (AppDocContRefusalReason tj = new AppDocContRefusalReason(docNumber, at.m_access_token.access_token))
                 {
-                    if (tj5.m_error == tj5.e_CONTENT)
+                    if (tj.m_error == tj.e_NONE)
                     {
-                        Console.WriteLine("ステータスコード：" + tj5.m_result.statusCode);
-                        Console.WriteLine("エラーメッセージ：" + tj5.m_result.errorMessage);
-                        Console.WriteLine("残アクセス数：" + tj5.m_result.remainAccessCount);
-                    }
-                    else
-                    if (tj5.m_error == tj5.e_NONE)
-                    {
-                        foreach (string f in tj5.m_files)
+                        foreach (string f in tj.m_files)
                         {
                             Console.WriteLine(f);
 
-                            string curDir = System.IO.Directory.GetCurrentDirectory();
-                            Xml2Word xml2word = new Xml2Word(f, docNumber, curDir, 20,15,30,25);
+                            Xml2Word xml2word = new Xml2Word(f, docNumber);
+                            Console.WriteLine(xml2word.m_wordFilePath);
                         }
+                    }
+                    else if (tj.m_error == tj.e_NETWORK)
+                    {
+                        Console.WriteLine("\tネットワークエラーです。");
+                    }
+                    else if (tj.m_error == tj.e_SERVER)
+                    {
+                        Console.WriteLine("\tサーバエラーです。");
+                    }
+                    else if (tj.m_error == tj.e_TIMEOVER)
+                    {
+                        Console.WriteLine("\tタイムオーバーエラーです。");
+                    }
+                    else if (tj.m_error == tj.e_CONTENT)
+                    {
+                        Console.WriteLine("\t内容のエラーです。");
+                        if (tj.m_result != null)
+                        {
+                            Console.WriteLine("ステータスコード：" + tj.m_result.statusCode);
+                            Console.WriteLine("エラーメッセージ：" + tj.m_result.errorMessage);
+                            Console.WriteLine("残アクセス数：" + tj.m_result.remainAccessCount);
+                        }
+
+                    }
+                    else if (tj.m_error == tj.e_ZIPFILE)
+                    {
+                        Console.WriteLine("\tZIPの解凍エラーです。");
+                    }
+                    else if (tj.m_error == tj.e_CACHE)
+                    {
+                        Console.WriteLine("\tキャッシュエラーです。");
+                    }
+                    else if (tj.m_error == tj.e_ACCOUNT)
+                    {
+                        Console.WriteLine("\tアカウントのエラーです。");
                     }
                 }
             }

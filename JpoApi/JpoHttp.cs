@@ -42,7 +42,7 @@ namespace JpoApi
             try
             {
                 m_error = e_NONE;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(a_url);
                 req.Method = "GET";
                 if(accessToken.Length > 0)
@@ -87,7 +87,7 @@ namespace JpoApi
             try
             {
                 m_error = e_NONE;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(a_url);
                 req.Method = "GET";
                 req.Headers.Add("Authorization", "Bearer " + a_access_token);
@@ -131,7 +131,7 @@ namespace JpoApi
                 m_error = e_NONE;
                 //文字コードを指定する
                 System.Text.Encoding enc = System.Text.Encoding.GetEncoding("UTF-8");
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(a_url);
                 ((HttpWebRequest)req).UserAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36";
 

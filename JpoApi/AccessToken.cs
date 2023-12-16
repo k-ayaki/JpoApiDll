@@ -36,15 +36,15 @@ namespace JpoApi
         private DateTime dt;
         public AccessToken(string aId, string aPassword, string a_authPath)
         {
-            m_id = aId;
-            m_password = aPassword;
+            this.m_id = aId;
+            this.m_password = aPassword;
             if (a_authPath.IndexOf("https://") >= 0)
             {
-                m_authFullPath = a_authPath;
+                this.m_authFullPath = a_authPath;
             }
             else
             {
-                m_authFullPath = Settings.Default.at_url + a_authPath;
+                this.m_authFullPath = Settings.Default.at_url + a_authPath;
             }
             get();
         }
@@ -55,8 +55,8 @@ namespace JpoApi
             System.Text.Encoding enc = System.Text.Encoding.GetEncoding("UTF-8");
             //POST送信する文字列を作成
             string postData = "grant_type=password"
-                            + "&username=" + System.Web.HttpUtility.UrlEncode(m_id, enc)
-                            + "&password=" + System.Web.HttpUtility.UrlEncode(m_password, enc);
+                            + "&username=" + System.Web.HttpUtility.UrlEncode(this.m_id, enc)
+                            + "&password=" + System.Web.HttpUtility.UrlEncode(this.m_password, enc);
 
             using (JpoHttp jpoHttp = new JpoHttp())
             {
@@ -66,12 +66,12 @@ namespace JpoApi
                 if (jpoHttp.m_error == jpoHttp.e_NONE)
                 {
                     dt = DateTime.Now;
-                    m_access_token = JsonConvert.DeserializeObject<CAccessToken>(jpoHttp.m_json);
+                    this.m_access_token = JsonConvert.DeserializeObject<CAccessToken>(jpoHttp.m_json);
                 }
                 else
                 {
                     dt = DateTime.Now.AddHours(-1);
-                    m_access_token = JsonConvert.DeserializeObject<CAccessToken>(m_default_json);
+                    this.m_access_token = JsonConvert.DeserializeObject<CAccessToken>(m_default_json);
                 }
                 jpoHttp.Dispose();
             }

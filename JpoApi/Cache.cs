@@ -77,15 +77,15 @@ namespace JpoApi
                         Directory.CreateDirectory(this.m_cachePath);
                     }
                 }
-                this.m_error = e_NONE;
-                this.m_result = JsonConvert.DeserializeObject<CResult>(m_result_json);
-                this.m_cache_result = JsonConvert.DeserializeObject<CResult>(m_result_json);
+                this.m_error = this.e_NONE;
+                this.m_result = JsonConvert.DeserializeObject<CResult>(this.m_result_json);
+                this.m_cache_result = JsonConvert.DeserializeObject<CResult>(this.m_result_json);
 
                 this.m_jsonFilePath = m_cachePath + "\\" + fileNumber + ".json";
                 int iRet = isCache();
-                if (iRet == e_CONTENT || iRet == e_NONE)
+                if (iRet == e_CONTENT || iRet == this.e_NONE)
                 {
-                    return m_json;
+                    return this.m_json;
                 }
             }
             catch (System.IO.FileNotFoundException ex)
@@ -98,69 +98,81 @@ namespace JpoApi
             }
             if (m_access_token.Length > 0)
             {
-                read(szUri, m_access_token);
+                read(szUri, this.m_access_token);
             }
             else
             {
-                m_error = e_ACCOUNT;
+                this.m_error = this.e_ACCOUNT;
             }
             return m_json;
         }
         // キャッシュの存在チェック
         private int isCache()
         {
-            if (File.Exists(m_jsonFilePath))
+            if (File.Exists(this.m_jsonFilePath))
             {
-                System.IO.FileInfo fi = new System.IO.FileInfo(m_jsonFilePath);
+                System.IO.FileInfo fi = new System.IO.FileInfo(this.m_jsonFilePath);
                 DateTime dt = DateTime.Now;
                 Account ac = new Account();
                 if (dt.AddDays(-ac.m_cacheEffective).Date <= fi.LastWriteTime.Date)
                 {
                     using (JpoHttp jpo = new JpoHttp())
                     {
-                        jpo.m_json = File.ReadAllText(m_jsonFilePath);
+                        jpo.m_json = File.ReadAllText(this.m_jsonFilePath);
                         CJpo jpoObj = JsonConvert.DeserializeObject<CJpo>(jpo.m_json);
-                        m_result = jpoObj.result;
-                        m_cache_result = jpoObj.result;
+                        this.m_result = jpoObj.result;
+                        this.m_cache_result = jpoObj.result;
 
-                        switch (m_cache_result.statusCode)
+                        switch (this.m_cache_result.statusCode)
                         {
                             case "100":
-                                m_error = e_NONE;
+                                this.m_error = this.e_NONE;
                                 break;
                             case "107": // 該当するデータがありません。
                             case "108": // 該当する書類実体がありません。
                             case "111": // 提供対象外の案件番号のため取得できませんでした。
-                            case "204": // パラメーターの入力された値に問題があります。
-                            case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
-                            case "301": // 指定された特許情報取得APIのURLは存在しません。
-                                m_error = e_CONTENT;
+                                this.m_error = this.e_CONTENT;
                                 break;
                             case "203": // 1日のアクセス上限を超過したため閲覧を制限します。
+                                this.m_error = this.e_SERVER;
+                                break;
+                            case "204": // パラメーターの入力された値に問題があります。
+                            case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
                             case "210": // 無効なトークンです。
+                                this.m_error = this.e_CONTENT;
+                                break;
                             case "212": // 無効な認証情報です。
+                            case "301": // 指定された特許情報取得APIのURLは存在しません。
+                                this.m_error = this.e_NETWORK;
+                                break;
                             case "302": // 処理が時間内に終了しないため、タイムアウトになりました。
+                                this.m_error = this.e_TIMEOVER;
+                                break;
                             case "303": // アクセスが集中しています。
+                                this.m_error = this.e_SERVER;
+                                break;
                             case "400": // 無効なリクエストです。
                             case "999": // 想定外のエラーが発生しました。
+                                this.m_error = this.e_NETWORK;
+                                break;
                             default:
                                 break;
                         }
-                        m_json = jpo.m_json;
+                        this.m_json = jpo.m_json;
                         jpo.Dispose();
-                        return m_error;
+                        return this.m_error;
                     }
                 }
                 else
                 {
-                    m_error = e_CACHE;
+                    this.m_error = this.e_CACHE;
                 }
             }
             else
             {
-                m_error = e_CACHE;
+                this.m_error = this.e_CACHE;
             }
-            return m_error;
+            return this.m_error;
         }
         private void read(string szUri, string a_access_token)
         {
@@ -188,26 +200,38 @@ namespace JpoApi
                         this.m_result = jpoObj.result;
 
                         File.WriteAllText(m_jsonFilePath, jpo.m_json);
-                        switch (m_result.statusCode)
+                        switch (this.m_result.statusCode)
                         {
                             case "100":
-                                m_error = e_NONE;
+                                this.m_error = this.e_NONE;
                                 break;
                             case "107": // 該当するデータがありません。
                             case "108": // 該当する書類実体がありません。
                             case "111": // 提供対象外の案件番号のため取得できませんでした。
+                                this.m_error = this.e_CONTENT;
+                                break;
                             case "203": // 1日のアクセス上限を超過したため閲覧を制限します。
+                                this.m_error = this.e_SERVER;
+                                break;
                             case "204": // パラメーターの入力された値に問題があります。
                             case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
-                            case "301": // 指定された特許情報取得APIのURLは存在しません。
                             case "210": // 無効なトークンです。
+                                this.m_error = this.e_CONTENT;
+                                break;
                             case "212": // 無効な認証情報です。
+                            case "301": // 指定された特許情報取得APIのURLは存在しません。
+                                this.m_error = this.e_NETWORK;
+                                break;
                             case "302": // 処理が時間内に終了しないため、タイムアウトになりました。
+                                this.m_error = this.e_TIMEOVER;
+                                break;
                             case "303": // アクセスが集中しています。
+                                this.m_error = this.e_SERVER;
+                                break;
                             case "400": // 無効なリクエストです。
                             case "999": // 想定外のエラーが発生しました。
                             default:
-                                m_error = e_CONTENT;
+                                this.m_error = this.e_CONTENT;
                                 break;
                         }
                     }
