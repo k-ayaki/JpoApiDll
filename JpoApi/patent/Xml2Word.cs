@@ -70,7 +70,7 @@ namespace JpoApi
                             else
                             {
                                 this.m_wordFilePath = html2Word.m_wordFilePath;
-                                this.m_outFileName = xml2Html.m_title + ".docx"; //"特願" + xml2Html.m_DocNumber +  "_起案日" + xml2Html.m_Date + "_" + xml2Html.m_DocumentName + ".docx";
+                                this.m_outFileName = xml2Html.m_title + ".docx";
                             }
                         }
                         else
@@ -81,6 +81,10 @@ namespace JpoApi
                 }
                 if (outFilePath.Length > 0 && this.m_outFileName.Length > 0)
                 {
+                    if (System.IO.Directory.Exists(outFilePath) == false)
+                    {
+                        Directory.CreateDirectory(outFilePath);
+                    }
                     System.IO.File.Copy(this.m_wordFilePath, outFilePath + "\\" + this.m_outFileName, true);
                 }
             }
