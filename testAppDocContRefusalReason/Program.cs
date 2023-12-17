@@ -12,26 +12,30 @@ namespace testAppDocContRefusalReason
     {
         static void Main(string[] args)
         {
+            string app_base_path = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+            string ApplicationName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+
             Account ac = new Account();
             AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path);
             NetworkState networkState = new NetworkState();
 
             Console.WriteLine("■拒絶理由通知実体情報取得");
 
-            //            string[] docNumbers = { "2012000313", "2020000001", "2010002165", "2006106644", "2014060127", "2014089742","2020162217" };
-            string[] docNumbers = { "2020162217" };
+            string[] docNumbers = { "2012000313", "2020000001", "2010002165", "2006106644", "2014060127", "2014089742","2020162217" };
+            //string[] docNumbers = { "2020162217" };
             foreach (string docNumber in docNumbers)
             {
                 using (AppDocContRefusalReason tj = new AppDocContRefusalReason(docNumber, at.m_access_token.access_token))
                 {
-                    if (tj.m_error == tj.e_NONE)
+                    if (tj.m_error == tj.e_NONE && tj.m_files != null)
                     {
                         foreach (string f in tj.m_files)
                         {
                             Console.WriteLine(f);
 
-                            Xml2Word xml2word = new Xml2Word(f, docNumber);
+                            Xml2Word xml2word = new Xml2Word(f, docNumber, app_base_path + ApplicationName);
                             Console.WriteLine(xml2word.m_wordFilePath);
+                            Console.WriteLine(xml2word.m_provisions);
                         }
                     }
                     else if (tj.m_error == tj.e_NETWORK)

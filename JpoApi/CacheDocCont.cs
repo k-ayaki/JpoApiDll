@@ -182,11 +182,13 @@ namespace JpoApi
                     }
                     else
                     {
+                        this.m_json = "";
                         this.m_error = this.e_CACHE;
                     }
                 }
                 else
                 {
+                    this.m_json = "";
                     this.m_error = this.e_CACHE;
                 }
                 return this.m_error;
@@ -271,6 +273,7 @@ namespace JpoApi
                         CJpo cjpo = JsonConvert.DeserializeObject<CJpo>(jpo.m_json);
                         this.m_result = cjpo.result;
                         File.WriteAllText(this.m_zipFile, jpo.m_json);
+                        this.m_json = jpo.m_json;
                         switch (this.m_result.statusCode)
                         {
                             case "100": // 正常終了
@@ -310,6 +313,11 @@ namespace JpoApi
                     }
                     try
                     {
+                        this.m_result.statusCode = "";
+                        this.m_result.errorMessage = "";
+                        this.m_result.remainAccessCount = "";
+                        this.m_json = "";
+
                         File.WriteAllBytes(this.m_zipFile, jpo.m_content);
                         if (System.IO.Directory.Exists(this.m_extractPath))
                             System.IO.Directory.Delete(this.m_extractPath, true);
@@ -328,16 +336,19 @@ namespace JpoApi
                     }
                     catch (Exception ex)
                     {
+                        this.m_json = "";
                         this.m_error = this.e_CACHE;
                     }
                 }
                 else
                 {
+                    this.m_json = "";
                     this.m_error = this.e_NETWORK;
                 }
                 jpo.Dispose();
                 return;
             }
+            this.m_json = "";
             this.m_error = this.e_NETWORK;
             return;
         }

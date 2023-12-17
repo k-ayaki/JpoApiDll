@@ -80,12 +80,7 @@ namespace JpoApi
                     this.m_error = this.e_CACHE;
                 }
             }
-            catch (System.IO.FileNotFoundException ex)
-            {
-                this.m_error = this.e_CACHE;
-                return;
-            }
-            catch (System.UnauthorizedAccessException ex)
+            catch (Exception ex)
             {
                 this.m_error = this.e_CACHE;
                 return;
@@ -2316,116 +2311,123 @@ namespace JpoApi
         // 条文
         private string provisions(XmlNode node_drafting_body, XmlNamespaceManager xmlNsManager)
         {
-            string provisionsDetail = "";
-
-            string drafting_body = p2html(node_drafting_body);
-
-            // xmlのdrafting-body を改行ごとに区分
-            string[] del = { "\r\n" };
-            string[] sentences = drafting_body.Split(del, StringSplitOptions.None);
-
-            // 条文列挙部分の接続
-            for (int i = 0; i + 1 < sentences.Length; i++)
+            try
             {
-                if (sentences[i].IndexOf(@"<br />") == 36
-                && sentences[i].Substring(35, 1) != "。")
-                {
-                    sentences[i] = sentences[i].Substring(0, 36);
-                    sentences[i] += sentences[i + 1];
-                    sentences[i] = sentences[i].Replace("　", "");
-                    sentences[i + 1] = "";
-                }
-                if (sentences[i].IndexOf("　記") >= 0)
-                {
-                    break;
-                }
-            }
+                string provisionsDetail = "";
 
-            foreach (string sentence in sentences)
-            {
-                string sentence2 = sentence.Replace(@"<br />", "");
-                sentence2 = sentence2.Replace("　", "");
-                sentence2 = Strings.StrConv(sentence2, VbStrConv.Wide, 0x411);
+                string drafting_body = p2html(node_drafting_body);
 
-                // 条文列挙部分の抽出
-                if (Regex.IsMatch(sentence2, "この出願(の|は[、，]?)(下記の請求項|請求項[０-９，、]+|特許請求の範囲|発明の詳細な説明|特許請求の範囲又は発明の詳細な説明|明細書|下記)")
-                || Regex.IsMatch(sentence2, "その出願の日前の(日本語)?特許出願であって、")
-                || Regex.IsMatch(sentence2, "[０-９]+年[０-９]+月[０-９]+日付けでした手続補正は[、，]")
-                || sentence2.IndexOf("特許を受けることができない") >= 0
-                || (sentence2.IndexOf("要件を") >= 0 && sentence2.IndexOf("満たしていない") >= 0))
+                // xmlのdrafting-body を改行ごとに区分
+                string[] del = { "\r\n" };
+                string[] sentences = drafting_body.Split(del, StringSplitOptions.None);
+
+                // 条文列挙部分の接続
+                for (int i = 0; i + 1 < sentences.Length; i++)
                 {
-                    // 括弧部分の除去
-                    string sentence3 = "";
-                    foreach (Match match0 in Regex.Matches(sentence2, "(?<lv0>[^（]*)?(?<lv1>（[^）]*）)?"))
+                    if (sentences[i].IndexOf(@"<br />") == 36
+                    && sentences[i].Substring(35, 1) != "。")
                     {
-                        sentence3 += match0.Groups["lv0"].Value;
+                        sentences[i] = sentences[i].Substring(0, 36);
+                        sentences[i] += sentences[i + 1];
+                        sentences[i] = sentences[i].Replace("　", "");
+                        sentences[i + 1] = "";
                     }
-
-                    string prov1 = "";
-                    string lv1 = "";
-                    string lv2 = "";
-                    string lv3 = "";
-                    foreach (Match match in Regex.Matches(sentence3, "(?<prov1>(?<lv1>特許法第?(?<lv11>[０-９]+条(の[０-９]+)?))?(?<lv2>第[０-９]+項(柱書)?)?(?<lv3>(?<lv31>第[０-９]+)(、|，)?(?<lv32>[０-９]+)?号)?)(および|及び|または|又は|亦は|叉は|ならびに?|並びに?|、|，|[のにで](規定|該当))"))
+                    if (sentences[i].IndexOf("　記") >= 0)
                     {
-                        prov1 = match.Groups["prov1"].Value;
-                        if (prov1.Length > 0)
+                        break;
+                    }
+                }
+
+                foreach (string sentence in sentences)
+                {
+                    string sentence2 = sentence.Replace(@"<br />", "");
+                    sentence2 = sentence2.Replace("　", "");
+                    sentence2 = Strings.StrConv(sentence2, VbStrConv.Wide, 0x411);
+
+                    // 条文列挙部分の抽出
+                    if (Regex.IsMatch(sentence2, "この出願(の|は[、，]?)(下記の請求項|請求項[０-９，、]+|特許請求の範囲|発明の詳細な説明|特許請求の範囲又は発明の詳細な説明|明細書|下記)")
+                    || Regex.IsMatch(sentence2, "その出願の日前の(日本語)?特許出願であって、")
+                    || Regex.IsMatch(sentence2, "[０-９]+年[０-９]+月[０-９]+日付けでした手続補正は[、，]")
+                    || sentence2.IndexOf("特許を受けることができない") >= 0
+                    || (sentence2.IndexOf("要件を") >= 0 && sentence2.IndexOf("満たしていない") >= 0))
+                    {
+                        // 括弧部分の除去
+                        string sentence3 = "";
+                        foreach (Match match0 in Regex.Matches(sentence2, "(?<lv0>[^（]*)?(?<lv1>（[^）]*）)?"))
                         {
-                            if (match.Groups["lv1"].Value.Length > 0)
+                            sentence3 += match0.Groups["lv0"].Value;
+                        }
+
+                        string prov1 = "";
+                        string lv1 = "";
+                        string lv2 = "";
+                        string lv3 = "";
+                        foreach (Match match in Regex.Matches(sentence3, "(?<prov1>(?<lv1>特許法第?(?<lv11>[０-９]+条(の[０-９]+)?))?(?<lv2>第[０-９]+項(柱書)?)?(?<lv3>(?<lv31>第[０-９]+)(、|，)?(?<lv32>[０-９]+)?号)?)(および|及び|または|又は|亦は|叉は|ならびに?|並びに?|、|，|[のにで](規定|該当))"))
+                        {
+                            prov1 = match.Groups["prov1"].Value;
+                            if (prov1.Length > 0)
                             {
-                                lv1 = "特許法第" + match.Groups["lv11"].Value;
-                                lv2 = match.Groups["lv2"].Value;
-                            }
-                            else
-                            if (lv1.Length > 0)
-                            {
-                                if (match.Groups["lv2"].Value.Length > 0)
+                                if (match.Groups["lv1"].Value.Length > 0)
                                 {
+                                    lv1 = "特許法第" + match.Groups["lv11"].Value;
                                     lv2 = match.Groups["lv2"].Value;
                                 }
-                            }
-                            else
-                            {
-                                continue;
-                            }
-                            if (match.Groups["lv32"].Value.Length > 0)
-                            {
-                                lv3 = match.Groups["lv31"].Value + "号";
-                            }
-                            else
-                            {
-                                lv3 = match.Groups["lv3"].Value;
-                            }
-                            prov1 = lv1 + lv2 + lv3;
-                            if (lv1 != "特許法第４１条")
-                            {
-                                if (provisionsDetail.IndexOf(prov1) == -1)
+                                else
+                                if (lv1.Length > 0)
                                 {
-                                    if (provisionsDetail.Length > 0)
+                                    if (match.Groups["lv2"].Value.Length > 0)
                                     {
-                                        provisionsDetail += ",";
+                                        lv2 = match.Groups["lv2"].Value;
                                     }
-                                    provisionsDetail += prov1;
                                 }
-                            }
-                            if (match.Groups["lv32"].Value.Length > 0
-                            && lv1 != "特許法第４１条")
-                            {
-                                lv3 = "第" + match.Groups["lv32"].Value + "号";
-                                prov1 = lv1 + lv2 + lv3;
-                                if (provisionsDetail.IndexOf(prov1) == -1)
+                                else
                                 {
-                                    if (provisionsDetail.Length > 0)
+                                    continue;
+                                }
+                                if (match.Groups["lv32"].Value.Length > 0)
+                                {
+                                    lv3 = match.Groups["lv31"].Value + "号";
+                                }
+                                else
+                                {
+                                    lv3 = match.Groups["lv3"].Value;
+                                }
+                                prov1 = lv1 + lv2 + lv3;
+                                if (lv1 != "特許法第４１条")
+                                {
+                                    if (provisionsDetail.IndexOf(prov1) == -1)
                                     {
-                                        provisionsDetail += ",";
+                                        if (provisionsDetail.Length > 0)
+                                        {
+                                            provisionsDetail += ",";
+                                        }
+                                        provisionsDetail += prov1;
                                     }
-                                    provisionsDetail += prov1;
+                                }
+                                if (match.Groups["lv32"].Value.Length > 0
+                                && lv1 != "特許法第４１条")
+                                {
+                                    lv3 = "第" + match.Groups["lv32"].Value + "号";
+                                    prov1 = lv1 + lv2 + lv3;
+                                    if (provisionsDetail.IndexOf(prov1) == -1)
+                                    {
+                                        if (provisionsDetail.Length > 0)
+                                        {
+                                            provisionsDetail += ",";
+                                        }
+                                        provisionsDetail += prov1;
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                return provisionsDetail;
             }
-            return provisionsDetail;
+            catch (Exception e)
+            {
+                return "ErrorProvision";
+            }
         }
         protected virtual void Dispose(bool disposing)
         {

@@ -14,6 +14,7 @@ namespace testAppDocContOpinionAmendment
         static void Main(string[] args)
         {
             string app_base_path = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+            string ApplicationName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
 
             Account ac = new Account();
             AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path);
@@ -21,17 +22,17 @@ namespace testAppDocContOpinionAmendment
             Console.WriteLine("■特許申請書類実体情報取得");
             string curDir = System.IO.Directory.GetCurrentDirectory();
 
-            //string[] docNumbers = new string[] { "2015515485", "2012193763", "2012199157", "2015532525", "2015539540", "2015515940", "2015550024", "2012001505", "2012019353", "2009004798", "2006106644" };
-            string[] docNumbers = new string[] { "2012193763" };
+            string[] docNumbers = new string[] { "2015515485", "2012193763", "2012199157", "2015532525", "2015539540", "2015515940", "2015550024", "2012001505", "2012019353", "2009004798", "2006106644" };
+            //string[] docNumbers = new string[] { "2012193763" };
             foreach (string docNumber in docNumbers)
             {
                 AppDocContOpinionAmendment tj = new AppDocContOpinionAmendment(docNumber, at.m_access_token.access_token);
-                if (tj.m_error == tj.e_NONE)
+                if (tj.m_error == tj.e_NONE && tj.m_files != null)
                 {
                     foreach (string filePath in tj.m_files)
                     {
                         Console.WriteLine(filePath);
-                        Xml2Word xml2html11 = new Xml2Word(filePath, docNumber, app_base_path);
+                        Xml2Word xml2html11 = new Xml2Word(filePath, docNumber, app_base_path + ApplicationName);
                     }
                 }
                 else if (tj.m_error == tj.e_NETWORK)

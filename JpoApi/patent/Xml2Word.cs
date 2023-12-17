@@ -31,7 +31,6 @@ namespace JpoApi
         public string m_provisions { get; set; }
         public Xml2Word(string xmlFilePath, string docNumber, string outFilePath="", double arMargin=20.0, double alMargin=15.0, double abMargin=20.0, double atMargin=15.0)
         {
-
             try
             {
                 this.m_error = e_NONE;
