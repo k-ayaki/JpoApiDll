@@ -66,7 +66,7 @@ namespace JpoApi
                 if (jpoHttp.m_error == jpoHttp.e_NONE)
                 {
                     dt = DateTime.Now;
-                    this.m_access_token = JsonConvert.DeserializeObject<CAccessToken>(jpoHttp.m_json);
+                    this.m_access_token = JsonConvert.DeserializeObject<CAccessToken>(jpoHttp.m_response);
                 }
                 else
                 {

@@ -122,8 +122,8 @@ namespace JpoApi
             public CResult result { get; set; }
         }
 
-        public string m_json { get; set; }
-        public string m_jsonFile { get; set; }
+        public string m_response { get; set; }
+        public string m_responseFile { get; set; }
 
         public AppProgress(string applicationNumber, string a_access_token = "")
         {
@@ -142,22 +142,22 @@ namespace JpoApi
                 if(a_access_token.Length == 0)
                 {
                     this.m_error = this.e_ACCOUNT;
-                    this.m_json = "";
-                    this.m_jsonFile = "";
+                    this.m_response = "";
+                    this.m_responseFile = "";
                     this.m_data = null;
                     this.m_result = null;
                     return;
                 }
                 m_error = e_NONE;
-                using (Cache jsonCache = new Cache(a_access_token))
+                using (Cache responseCache = new Cache(a_access_token))
                 {
-                    this.m_json = jsonCache.GetJson("api/patent/v1/app_progress/" + applicationNumber);
-                    this.m_jsonFile = jsonCache.m_jsonFilePath;
-                    this.m_error = jsonCache.m_error;
+                    this.m_response = responseCache.GetJson("api/patent/v1/app_progress/" + applicationNumber);
+                    this.m_responseFile = responseCache.m_responseFilePath;
+                    this.m_error = responseCache.m_error;
 
-                    if (m_json.Length > 0)
+                    if (m_response.Length > 0)
                     {
-                        CAppProgress jsonObj = JsonConvert.DeserializeObject<CAppProgress>(m_json);
+                        CAppProgress jsonObj = JsonConvert.DeserializeObject<CAppProgress>(m_response);
                         this.m_result = jsonObj.result;
                         if (jsonObj.result != null)
                         {
@@ -210,6 +210,20 @@ namespace JpoApi
             {
                 this.m_error = this.e_ACCOUNT;
             }
+        }
+        public CDocumentList cDocumentList(string aDocumentNumber)
+        {
+            foreach (CBibliographyInformation cBibliographyInformation in m_result.data.bibliographyInformation)
+            {
+                foreach (CDocumentList documentList in cBibliographyInformation.documentList)
+                {
+                    if (documentList.documentNumber == aDocumentNumber)
+                    {
+                        return documentList;
+                    }
+                }
+            }
+            return null;
         }
         protected virtual void Dispose(bool disposing)
         {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -41,17 +42,22 @@ namespace JpoApi
         {
             public CResult result { get; set; }
         }
+        public string m_jsonFile { get; set; }
         public string m_zipFile { get; set; }
+        public string m_pdfFile { get; set; }
         public string m_extractPath { get; set; }
-        public string m_json { get; set; }
+        public string m_response { get; set; }
         private string m_access_token { get; set; }
-        private string m_requestNumber { get; set; }
+        private string m_fileName { get; set; }
         public CacheDocCont(string a_access_token)
         {
             this.m_access_token = a_access_token;
-            this.m_json = "";
+            this.m_response = "";
             this.m_cachePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            this.m_requestNumber = "";
+            this.m_fileName = "";
+            this.m_zipFile = "";
+            this.m_pdfFile = "";
+            this.m_extractPath = "";
             string[] dirs = @"\ayaki\jpoapi".Split('\\');
             foreach (string dir in dirs)
             {
@@ -70,11 +76,20 @@ namespace JpoApi
             try
             {
                 this.m_error = this.e_NONE;
+                this.m_response = "";
                 this.m_result = JsonConvert.DeserializeObject<CResult>(this.m_result_json);
                 this.m_cache_result = JsonConvert.DeserializeObject<CResult>(this.m_result_json);
 
                 string[] dirs = szUri.Split('/');
-                this.m_requestNumber = dirs[dirs.Length - 1];
+                if (dirs.Length >= 1)
+                {
+                    this.m_fileName = dirs[dirs.Length - 1];
+                }
+                else
+                {
+                    this.m_error = this.e_NETWORK;
+                    return;
+                }
 
                 var dirList = new List<string>();
                 dirList = dirs.ToList();
@@ -88,15 +103,32 @@ namespace JpoApi
                         Directory.CreateDirectory(this.m_cachePath);
                     }
                 }
-                this.m_zipFile = this.m_cachePath + @"\" + this.m_requestNumber + ".zip";
-                this.m_extractPath = this.m_cachePath + @"\" + this.m_requestNumber;
-                if (this.isCache() == this.e_CONTENT)
+                this.m_jsonFile = this.m_cachePath + @"\" + this.m_fileName + ".json";
+                this.m_zipFile = this.m_cachePath + @"\" + this.m_fileName + ".zip";
+                this.m_extractPath = this.m_cachePath + @"\" + this.m_fileName;
+
+                this.moveJson(this.m_zipFile, this.m_jsonFile);
+                this.m_error = this.isJsonCache();
+                if (this.m_error == this.e_NETWORK
+                || this.m_error == this.e_SERVER
+                || this.m_error == this.e_CONTENT
+                || this.m_error == this.e_ACCOUNT)
                 {
+                    // jsonファイルが有ったならばZipファイルは削除
+                    if (File.Exists(this.m_zipFile))
+                    {
+                        File.Delete(this.m_zipFile);
+                    }
                     return;
                 }
-                this.readCache();
+                this.extractZipCache(this.m_zipFile);
                 if (this.m_error == this.e_NONE || this.m_error == this.e_CONTENT)
                 {
+                    // キャッシュが正しく解凍できたならjsonファイルを削除
+                    if (File.Exists(this.m_jsonFile))
+                    {
+                        File.Delete(this.m_jsonFile);
+                    }
                     return;
                 }
             }
@@ -114,101 +146,213 @@ namespace JpoApi
                 this.m_error = this.e_ACCOUNT;
             }
         }
-        // キャッシュの存在チェック
-        private int isCache()
+        public void GetPdf(string szUri)
         {
             try
             {
                 this.m_error = this.e_NONE;
-                if (File.Exists(this.m_zipFile))
+                this.m_result = JsonConvert.DeserializeObject<CResult>(this.m_result_json);
+                this.m_cache_result = JsonConvert.DeserializeObject<CResult>(this.m_result_json);
+
+                string[] dirs = szUri.Split('/');
+                if (dirs.Length >= 1)
                 {
-                    System.IO.FileInfo fi = new System.IO.FileInfo(this.m_zipFile);
+                    this.m_fileName = dirs[dirs.Length - 1];
+                }
+                else
+                {
+                    this.m_error = this.e_NETWORK;
+                    return;
+                }
+
+                var dirList = new List<string>();
+                dirList = dirs.ToList();
+                dirList.RemoveAt(dirs.Length - 1);
+
+                foreach (string dir in dirList)
+                {
+                    this.m_cachePath += "\\" + dir;
+                    if (Directory.Exists(this.m_cachePath) == false)
+                    {
+                        Directory.CreateDirectory(this.m_cachePath);
+                    }
+                }
+                this.m_jsonFile = this.m_cachePath + @"\" + this.m_fileName + ".json";
+                this.m_pdfFile = this.m_cachePath + @"\" + this.m_fileName + ".pdf";
+                this.moveJson(this.m_pdfFile, this.m_jsonFile);
+                this.m_error = this.isJsonCache();
+                if (this.m_error == this.e_NETWORK
+                || this.m_error == this.e_SERVER
+                || this.m_error == this.e_CONTENT
+                || this.m_error == this.e_ACCOUNT)
+                {
+                    // jsonファイルが有ったならばPDFファイルは削除
+                    if (File.Exists(this.m_pdfFile))
+                    {
+                        File.Delete(this.m_pdfFile);
+                    }
+                    return;
+                }
+                this.m_error = isCache(this.m_pdfFile);
+                if (this.m_error == this.e_NONE || this.m_error == this.e_CONTENT)
+                {
+                    if (File.Exists(this.m_jsonFile))
+                    {
+                        File.Delete(this.m_jsonFile);
+                    }
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                ;
+            }
+
+            if (this.m_access_token.Length > 0)
+            {
+                this.read(szUri, this.m_access_token);
+            }
+            else
+            {
+                this.m_error = this.e_ACCOUNT;
+            }
+        }
+
+        private void moveJson(string cacheFile, string jsonFile)
+        {
+            try
+            {
+                this.m_error = this.e_NONE;
+                if (File.Exists(cacheFile))
+                {
+                    string w_response = File.ReadAllText(cacheFile);
+                    if (w_response.Substring(0, 1) == "{")
+                    {
+                        CJpo cjpo = JsonConvert.DeserializeObject<CJpo>(w_response);  // json であるか判定
+
+                        File.Move(cacheFile, jsonFile);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ;
+            }
+        }
+        // jsonキャッシュの存在チェック
+        private int isJsonCache()
+        {
+            int w_error = this.e_NONE;
+            try
+            {
+                if (File.Exists(this.m_jsonFile))
+                {
+                    System.IO.FileInfo fi = new System.IO.FileInfo(this.m_jsonFile);
                     DateTime dt = DateTime.Now;
                     Account ac = new Account();
                     if (dt.AddDays(-ac.m_cacheEffective).Date <= fi.LastWriteTime.Date)
                     {
-                        this.m_json = File.ReadAllText(this.m_zipFile);
-                        CJpo cjpo = JsonConvert.DeserializeObject<CJpo>(this.m_json);
-                        this.m_result = cjpo.result;
-                        this.m_cache_result = cjpo.result;
-                        switch (this.m_cache_result.statusCode)
+                        this.m_response = File.ReadAllText(this.m_jsonFile);
+                        if (this.m_response.Substring(0,1) == "{")
                         {
-                            case "107": // 該当するデータがありません。
-                            case "108": // 該当する書類実体がありません。
-                            case "111": // 提供対象外の案件番号のため取得できませんでした。
-                                this.m_error = this.e_CONTENT;
-                                break;
-                            case "203": // 1日のアクセス上限を超過したため閲覧を制限します。
-                                this.m_error = this.e_SERVER;
-                                // jsonファイルを削除
-                                if (System.IO.File.Exists(this.m_zipFile))
-                                    File.Delete(this.m_zipFile);
-                                break;
-                            case "204": // パラメーターの入力された値に問題があります。
-                            case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
-                            case "210": // 無効なトークンです。
-                                this.m_error = this.e_CONTENT;
-                                break;
-                            case "212": // 無効な認証情報です。
-                            case "301": // 指定された特許情報取得APIのURLは存在しません。
-                                this.m_error = this.e_NETWORK;
-                                // jsonファイルを削除
-                                if (System.IO.File.Exists(this.m_zipFile))
-                                    File.Delete(this.m_zipFile);
-                                break;
-
-                            case "302": // 処理が時間内に終了しないため、タイムアウトになりました。
-                                this.m_error = this.e_TIMEOVER;
-                                // jsonファイルを削除
-                                if (System.IO.File.Exists(this.m_zipFile))
-                                    File.Delete(this.m_zipFile);
-                                break;
-                            case "303": // アクセスが集中しています。
-                                this.m_error = this.e_SERVER;
-                                // jsonファイルを削除
-                                if (System.IO.File.Exists(this.m_zipFile))
-                                    File.Delete(this.m_zipFile);
-                                break;
-                            case "400": // 無効なリクエストです。
-                            case "999": // 想定外のエラーが発生しました。
-                            default:
-                                this.m_error = this.e_NETWORK;
-                                // jsonファイルを削除
-                                if (System.IO.File.Exists(this.m_zipFile))
-                                    File.Delete(this.m_zipFile);
-                                break;
+                            CJpo cjpo = JsonConvert.DeserializeObject<CJpo>(this.m_response);  // json であるか判定
+                            w_error = this.libStatus(cjpo.result.statusCode);
+                            if (w_error == this.e_SERVER
+                            || w_error == this.e_NETWORK
+                            || w_error == this.e_TIMEOVER)
+                            {
+                                if (System.IO.File.Exists(this.m_jsonFile))
+                                    File.Delete(this.m_jsonFile);
+                            }
                         }
-                        return this.m_error;
+                        return w_error;
+                    }
+                }
+                return w_error;
+            }
+            catch (Exception ex)
+            {
+                this.m_response = "";
+                w_error = this.e_CONTENT;
+                return w_error;
+            }
+        }
+
+        // キャッシュの存在チェック
+        private int isCache(string cacheFile)
+        {
+            int w_error = this.e_NONE;
+            try
+            {
+                if (File.Exists(cacheFile))
+                {
+                    System.IO.FileInfo fi = new System.IO.FileInfo(cacheFile);
+                    DateTime dt = DateTime.Now;
+                    Account ac = new Account();
+                    if (dt.AddDays(-ac.m_cacheEffective).Date <= fi.LastWriteTime.Date)
+                    {
+                        return w_error;
                     }
                     else
                     {
-                        this.m_json = "";
-                        this.m_error = this.e_CACHE;
+                        this.m_response = "";
+                        w_error = this.e_CACHE;
                     }
                 }
                 else
                 {
-                    this.m_json = "";
-                    this.m_error = this.e_CACHE;
+                    this.m_response = "";
+                    w_error = this.e_CACHE;
                 }
-                return this.m_error;
+                return w_error;
             }
             catch (Exception ex)
             {
-                this.m_error = this.e_CACHE;
-                this.m_json = "";
-                return this.m_error;
+                this.m_response = "";
+                return w_error;
             }
         }
+        public int libStatus(string wStatusCode)
+        {
+            switch (wStatusCode)
+            {
+                case "100":
+                    return this.e_NONE;
+                case "107": // 該当するデータがありません。
+                case "108": // 該当する書類実体がありません。
+                case "111": // 提供対象外の案件番号のため取得できませんでした。
+                    return this.e_CONTENT;
+                case "203": // 1日のアクセス上限を超過したため閲覧を制限します。
+                    return this.e_SERVER;
+                case "204": // パラメーターの入力された値に問題があります。
+                case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
+                case "210": // 無効なトークンです。
+                    return this.e_CONTENT;
+                case "212": // 無効な認証情報です。
+                case "301": // 指定された特許情報取得APIのURLは存在しません。
+                    return this.e_NETWORK;
+                case "302": // 処理が時間内に終了しないため、タイムアウトになりました。
+                    return this.e_TIMEOVER;
+                case "303": // アクセスが集中しています。
+                    return this.e_SERVER;
+                case "400": // 無効なリクエストです。
+                case "999": // 想定外のエラーが発生しました。
+                    return this.e_NETWORK;
+                default:
+                    break;
+            }
+            return 0;
+        }
 
-        // キャッシュの読み込み
-        private int readCache()
+
+        // Zipキャッシュの読み込み
+        private int extractZipCache(string cacheFile)
         {
             try
             {
-                if (File.Exists(this.m_zipFile))
+                if (File.Exists(cacheFile))
                 {
-                    System.IO.FileInfo fi = new System.IO.FileInfo(this.m_zipFile);
+                    System.IO.FileInfo fi = new System.IO.FileInfo(cacheFile);
                     DateTime dt = DateTime.Now;
                     Account ac = new Account();
                     if (dt.AddDays(-ac.m_cacheEffective).Date <= fi.LastWriteTime.Date)
@@ -250,6 +394,7 @@ namespace JpoApi
                 return this.m_error;
             }
         }
+
         private void read(string szUri, string a_access_token)
         {
             using (JpoHttp jpo = new JpoHttp())
@@ -266,46 +411,24 @@ namespace JpoApi
                 jpo.get(Properties.Settings.Default.at_url + "/" + szUri, a_access_token);
                 System.IO.File.SetCreationTime(ac.m_iniFilePath, DateTime.Now);
 
+
                 if (jpo.m_error == jpo.e_NONE)
                 {
                     try
                     {
-                        CJpo cjpo = JsonConvert.DeserializeObject<CJpo>(jpo.m_json);
-                        this.m_result = cjpo.result;
-                        File.WriteAllText(this.m_zipFile, jpo.m_json);
-                        this.m_json = jpo.m_json;
-                        switch (this.m_result.statusCode)
+                        if (jpo.m_response.Substring(0,1) == "{")
                         {
-                            case "100": // 正常終了
-                            case "107": // 該当するデータがありません。
-                            case "108": // 該当する書類実体がありません。
-                            case "111": // 提供対象外の案件番号のため取得できませんでした。
-                                this.m_error = this.e_CONTENT;
-                                break;
-                            case "203": // 1日のアクセス上限を超過したため閲覧を制限します。
-                                this.m_error = this.e_SERVER;
-                                break;
-                            case "204": // パラメーターの入力された値に問題があります。
-                            case "208": // 「タブ文字、,、 :、|」の文字は利用できません。
-                            case "210": // 無効なトークンです。
-                                this.m_error = this.e_CONTENT;
-                                break;
-                            case "212": // 無効な認証情報です。
-                            case "301": // 指定された特許情報取得APIのURLは存在しません。
-                                this.m_error = this.e_NETWORK;
-                                break;
-                            case "302": // 処理が時間内に終了しないため、タイムアウトになりました。
-                                this.m_error = this.e_TIMEOVER;
-                                break;
-                            case "303": // アクセスが集中しています。
-                                this.m_error = this.e_SERVER;
-                                break;
-                            case "400": // 無効なリクエストです
-                            case "999": // 想定外のエラーが発生しました。
-                                this.m_error = this.e_NETWORK;
-                                break;
+                            CJpo cjpo = JsonConvert.DeserializeObject<CJpo>(jpo.m_response);
+                            if (cjpo != null)
+                            {
+                                this.m_result = cjpo.result;
+                                File.WriteAllText(this.m_jsonFile, jpo.m_response);
+                                this.m_response = jpo.m_response;
+                                this.m_error = this.libStatus(this.m_result.statusCode);
+                                jpo.Dispose();
+                                return;
+                            }
                         }
-                        return;
                     }
                     catch (Exception ex)
                     {
@@ -316,39 +439,45 @@ namespace JpoApi
                         this.m_result.statusCode = "";
                         this.m_result.errorMessage = "";
                         this.m_result.remainAccessCount = "";
-                        this.m_json = "";
+                        this.m_response = "";
 
-                        File.WriteAllBytes(this.m_zipFile, jpo.m_content);
-                        if (System.IO.Directory.Exists(this.m_extractPath))
-                            System.IO.Directory.Delete(this.m_extractPath, true);
-
-
-                        System.IO.Compression.ZipFile.ExtractToDirectory(this.m_zipFile, this.m_extractPath, System.Text.Encoding.GetEncoding("shift_jis"));
-                        this.m_files = System.IO.Directory.EnumerateFiles(this.m_extractPath, "*.xml", System.IO.SearchOption.AllDirectories);
-                        if (this.m_files == null)
+                        if (this.m_zipFile.Length > 0)
                         {
-                            this.m_error = this.e_CACHE;
+                            File.WriteAllBytes(this.m_zipFile, jpo.m_content);
+                            if (System.IO.Directory.Exists(this.m_extractPath))
+                                System.IO.Directory.Delete(this.m_extractPath, true);
+                            System.IO.Compression.ZipFile.ExtractToDirectory(this.m_zipFile, this.m_extractPath, System.Text.Encoding.GetEncoding("shift_jis"));
+                            this.m_files = System.IO.Directory.EnumerateFiles(this.m_extractPath, "*.xml", System.IO.SearchOption.AllDirectories);
+                            if (this.m_files == null)
+                            {
+                                this.m_error = this.e_CACHE;
+                            }
+                            else
+                            {
+                                this.m_error = this.e_NONE;
+                            }
                         }
                         else
+                        if (this.m_pdfFile.Length > 0)
                         {
+                            File.WriteAllBytes(this.m_pdfFile, jpo.m_content);
                             this.m_error = this.e_NONE;
                         }
                     }
                     catch (Exception ex)
                     {
-                        this.m_json = "";
+                        this.m_response = "";
                         this.m_error = this.e_CACHE;
                     }
                 }
                 else
                 {
-                    this.m_json = "";
-                    this.m_error = this.e_NETWORK;
+                    this.m_error = jpo.m_error;
                 }
                 jpo.Dispose();
                 return;
             }
-            this.m_json = "";
+            this.m_response = "";
             this.m_error = this.e_NETWORK;
             return;
         }

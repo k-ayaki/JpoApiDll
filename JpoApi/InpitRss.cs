@@ -32,7 +32,7 @@ namespace JpoApi
                 using (JpoHttp jpoHttp = new JpoHttp())
                 {
                     jpoHttp.get(m_url, "");
-                    m_rss = jpoHttp.m_json;
+                    m_rss = jpoHttp.m_response;
                     m_statusCode = jpoHttp.m_statusCode;
                     XmlDocument xDoc = new XmlDocument();
                     if (m_rss.Length > 0)

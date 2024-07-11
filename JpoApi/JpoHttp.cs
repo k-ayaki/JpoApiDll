@@ -27,21 +27,21 @@ namespace JpoApi
 
         public readonly int i_BUFLEN = 8192;
 
-        public byte[] m_buf = new byte[8192];
-        public string m_json;
+        //public byte[] m_buf = new byte[8192];
+        public string m_response;
         public byte[] m_content = new byte[0];
         public int m_statusCode;
         public JpoHttp()
         {
-            m_statusCode = 0;
-            m_error = e_NONE;
-            m_json = "";
+            this.m_statusCode = 0;
+            this.m_error = e_NONE;
+            this.m_response = "";
         }
         public void get(string a_url, string accessToken = "")
         {
             try
             {
-                m_error = e_NONE;
+                this.m_error = e_NONE;
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
                 HttpWebRequest req = (HttpWebRequest)WebRequest.Create(a_url);
                 req.Method = "GET";
@@ -53,7 +53,7 @@ namespace JpoApi
                 //サーバーからの応答を受信するためのHttpWebResponseを取得
                 using (HttpWebResponse res = (HttpWebResponse)req.GetResponse())
                 {
-                    m_statusCode = (int)res.StatusCode;
+                    this.m_statusCode = (int)res.StatusCode;
                     //応答データを受信するためのStreamを取得
                     using (Stream st = res.GetResponseStream())
                     {
@@ -61,9 +61,9 @@ namespace JpoApi
                         using (MemoryStream ms = new MemoryStream())
                         {
                             st.CopyTo(ms);
-                            m_content = ms.ToArray();
+                            this.m_content = ms.ToArray();
                             //文字コードを指定して、バイト配列を変換
-                            m_json = System.Text.Encoding.UTF8.GetString(m_content);
+                            this.m_response = System.Text.Encoding.UTF8.GetString(m_content);
                         }
                     }
                 }
@@ -72,12 +72,12 @@ namespace JpoApi
             {
                 if (ex.Status == System.Net.WebExceptionStatus.NameResolutionFailure)
                 {
-                    m_error = e_NETWORK;
+                    this.m_error = e_NETWORK;
                     return;
                 }
                 else
                 {
-                    m_error = e_SERVER;
+                    this.m_error = e_SERVER;
                     return;
                 }
             }
@@ -104,7 +104,7 @@ namespace JpoApi
                         {
                             st.CopyTo(ms);
                             m_content = ms.ToArray();
-                            m_json = System.Text.Encoding.UTF8.GetString(m_content);
+                            m_response = System.Text.Encoding.UTF8.GetString(m_content);
                         }
                     }
                 }
@@ -157,7 +157,7 @@ namespace JpoApi
                             //受信して表示
                             using (System.IO.StreamReader sr = new System.IO.StreamReader(resStream, enc))
                             {
-                                m_json = sr.ReadToEnd();
+                                this.m_response = sr.ReadToEnd();
                             }
                         }
                     }
@@ -167,12 +167,12 @@ namespace JpoApi
             {
                 if (ex.Status == System.Net.WebExceptionStatus.NameResolutionFailure)
                 {
-                    m_error = e_NETWORK;
+                    this.m_error = e_NETWORK;
                     return;
                 }
                 else
                 {
-                    m_error = e_SERVER;
+                    this.m_error = e_SERVER;
                     return;
                 }
             }

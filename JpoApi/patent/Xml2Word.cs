@@ -29,7 +29,7 @@ namespace JpoApi
         public string m_title { get; set; }
         public string m_Date { get; set; }
         public string m_provisions { get; set; }
-        public Xml2Word(string xmlFilePath, string docNumber, string outFilePath="", double arMargin=20.0, double alMargin=15.0, double abMargin=20.0, double atMargin=15.0)
+        public Xml2Word(string xmlFilePath, string docNumber, string outFilePath = "", string aDate = "", double arMargin = 20.0, double alMargin = 15.0, double abMargin = 20.0, double atMargin = 15.0)
         {
             try
             {
@@ -40,11 +40,11 @@ namespace JpoApi
                 this.m_htmlFilePath = "";
                 this.m_outFileName = "";
                 this.m_title = "";
-                this.m_Date = "";
+                this.m_Date = aDate;
                 this.m_provisions = "";
 
                 // html に変換
-                using (Xml2Html xml2Html = new Xml2Html(xmlFilePath, docNumber))
+                using (Xml2Html xml2Html = new Xml2Html(xmlFilePath, docNumber, this.m_Date))
                 {
                     this.m_error = xml2Html.m_error;
 

@@ -33,7 +33,8 @@ namespace JpoApi
         private string m_xmlPath { get; set; }
         public string m_htmlPath { get; set; }
         public string m_dirName { get; set; }
-        public string m_Date { get; set; }      // 提出日・起案日
+        public string m_Date { get; set; }      // 起案日
+        public string m_legalDate { get; set; } // 提出日・発送日
         public string m_DocNumber { get; set; } // 出願番号
         public string m_DocumentName { get; set; }  // 文書名
         public string m_DocNumber2 { get; set; } // 出願番号 （外部指定）
@@ -44,11 +45,12 @@ namespace JpoApi
         private XmlNamespaceManager m_xmlNsManager { get; set; }
         public string m_provisions { get; set; }
 
-        public Xml2Html(string a_xmlPath, string a_DocNumber)
+        public Xml2Html(string a_xmlPath, string a_DocNumber, string aLegalDate)
         {
             try
             {
-                this.m_Date = "";
+                this.m_Date = string.Empty;
+                this.m_legalDate = aLegalDate;
                 this.m_error = e_NONE;
                 this.m_dirName = System.IO.Path.GetDirectoryName(a_xmlPath);
                 this.m_dirNames = a_xmlPath.Split('\\');
@@ -356,9 +358,6 @@ namespace JpoApi
                 if (node_date != null)
                 {
                     this.m_Date = node_date.InnerText;
-                } else
-                {
-                    this.m_Date = "";
                 }
                 // 出願番号
                 m_DocNumber = m_DocNumber2;
@@ -376,16 +375,18 @@ namespace JpoApi
                 }
                 if (this.m_DocNumber != null && this.m_DocNumber.Length > 0)
                 {
-                    wTitle = "特願" + this.m_DocNumber + "_起案日" + this.m_Date + "_" + this.m_DocumentName;
+                    wTitle = "特願" + this.m_DocNumber + "_発送日" + this.m_legalDate + "_" + this.m_DocumentName;
                 }
                 else
                 {
-                    wTitle = "起案日" + this.m_Date + "_" + this.m_DocumentName;
+                    wTitle = "発送日" + this.m_legalDate + "_" + this.m_DocumentName;
                 }
+                /*
                 if (this.m_dirNames.Length >= 2)
                 {
                     wTitle += this.m_dirNames[this.m_dirNames.Length - 2];
                 }
+                */
                 return wTitle;
             }
             catch (Exception ex)
@@ -526,7 +527,8 @@ namespace JpoApi
             try
             {
                 string wHtmlbody = "";
-                XmlNode node_payment = node.SelectSingleNode("jp:charge-article/jp:payment", xmlNsManager);
+                //XmlNode node_payment = node.SelectSingleNode("jp:charge-article/jp:payment", xmlNsManager);
+                XmlNode node_payment = node.SelectSingleNode("jp:payment", xmlNsManager);
                 if (node_payment != null)
                 {
                     wHtmlbody += html_p("【手数料の表示】");
@@ -569,6 +571,9 @@ namespace JpoApi
                         break;
                     case "transfer":
                         wHtmlbody += html_p("　　【振替番号】　　　" + Strings.StrConv(number, VbStrConv.Wide, 0x411));
+                        break;
+                    case "deposit":
+                        wHtmlbody += html_p("　　【予納台帳番号】　" + Strings.StrConv(number, VbStrConv.Wide, 0x411));
                         break;
                 }
                 if (amount.Length > 0)
@@ -1135,10 +1140,6 @@ namespace JpoApi
                 {
                     this.m_Date = node_date.InnerText;
                 }
-                else
-                {
-                    this.m_Date = "";
-                }
                 // 出願番号
                 this.m_DocNumber = this.m_DocNumber2;
                 XmlNode node_application_reference = node_rspns.SelectSingleNode("//jp:indication-of-case-article/jp:application-reference", xmlNsManager);
@@ -1155,16 +1156,18 @@ namespace JpoApi
                 }
                 if (this.m_DocNumber != null && this.m_DocNumber.Length > 0)
                 {
-                    wTitle = "特願" + this.m_DocNumber + "_起案日" + this.m_Date + "_" + this.m_DocumentName;
+                    wTitle = "特願" + this.m_DocNumber + "_発送日" + this.m_legalDate + "_" + this.m_DocumentName;
                 }
                 else
                 {
-                    wTitle = "起案日" + this.m_Date + "_" + this.m_DocumentName;
+                    wTitle = "発送日" + this.m_legalDate + "_" + this.m_DocumentName;
                 }
+                /*
                 if (this.m_dirNames.Length >= 2)
                 {
                     wTitle += this.m_dirNames[this.m_dirNames.Length - 2];
                 }
+                */
                 return wTitle;
             }
             catch (Exception ex)
@@ -1369,7 +1372,7 @@ namespace JpoApi
         {
             try
             {
-                string wTitle = "特願" + this.m_DocNumber2;
+                string wTitle = "特願" + this.m_DocNumber2 + "_発送日" + this.m_legalDate;
                 XmlNode node_document_name = node_attaching_document.SelectSingleNode("//jp:document-name", xmlNsManager);
                 if (node_document_name != null)
                 {
@@ -1379,11 +1382,14 @@ namespace JpoApi
                 {
                     this.m_DocumentName = "";
                 }
+
                 wTitle += "_" + m_DocumentName;
+                /*
                 if (this.m_dirNames.Length >= 2)
                 {
-                    wTitle += "_" + this.m_dirNames[this.m_dirNames.Length - 2];
+                    wTitle += this.m_dirNames[this.m_dirNames.Length - 2];
                 }
+                */
                 return wTitle;
             }
             catch (Exception ex)
@@ -1809,7 +1815,7 @@ namespace JpoApi
                 {
                     this.m_Date = node_drafting_date.InnerText;
                 }
-                wTitle = "特願" + this.m_DocNumber + "_起案日" + this.m_Date + "_" + this.m_DocumentName;
+                wTitle = "特願" + this.m_DocNumber + "_発送日" + this.m_legalDate + "_" + this.m_DocumentName;
                 return wTitle;
             }
             catch (Exception ex)
@@ -2246,15 +2252,15 @@ namespace JpoApi
                         wHtmlbody += "\r\n" + node_img(node);
                         break;
                     case "chemistry":
-                        wHtmlbody += "\r\n【化" + Strings.StrConv(node.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】\r\n";
+                        wHtmlbody += "\r\n【化" + Strings.StrConv(node.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】<br>\r\n";
                         wHtmlbody += p2html(node);
                         break;
                     case "tables":
-                        wHtmlbody += "\r\n【表" + Strings.StrConv(node.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】\r\n";
+                        wHtmlbody += "\r\n【表" + Strings.StrConv(node.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】<br>\r\n";
                         wHtmlbody += p2html(node);
                         break;
                     case "maths":
-                        wHtmlbody += "\r\n【数" + Strings.StrConv(node.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】\r\n";
+                        wHtmlbody += "\r\n【数" + Strings.StrConv(node.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】<br>\r\n";
                         wHtmlbody += p2html(node);
                         break;
                     case "patcit":
@@ -2267,7 +2273,8 @@ namespace JpoApi
                         wHtmlbody += "\r\n　　【図" + Strings.StrConv(node.Attributes["num"].Value, VbStrConv.Wide, 0x411) + "】" + node.OuterXml + "<br />\r\n";
                         break;
                     case "#text":
-                        string szText = HttpUtility.HtmlEncode(node.OuterXml);
+                        string szText = HttpUtility.HtmlDecode(node.OuterXml);
+                        szText = HttpUtility.HtmlEncode(szText);
                         szText = szText.Replace("&#160;", "&#32;");
                         wHtmlbody += szText;
                         break;

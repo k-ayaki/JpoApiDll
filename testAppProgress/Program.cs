@@ -14,9 +14,10 @@ namespace testAppProgress
             Account ac = new Account();
             AccessToken at = new AccessToken(ac.m_id, ac.m_password, ac.m_path);
 
-            AppProgress tj = new AppProgress("2023036507", at.m_access_token.access_token);
+
+            AppProgress tj = new AppProgress("2014560041", at.m_access_token.access_token);
             //AppProgress tj = new AppProgress("2023036507", at.m_access_token.access_token);
-            Console.WriteLine("■特許経過情報取得　2023036507");
+            Console.WriteLine("■特許経過情報取得　2014560041");
             if(tj.m_error == tj.e_NONE)
             {
                 if (tj.m_result != null)

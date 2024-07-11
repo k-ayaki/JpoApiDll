@@ -11,6 +11,7 @@ using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Web.UI.WebControls;
+using System.Text.RegularExpressions;
 
 namespace JpoApi
 {
@@ -26,9 +27,9 @@ namespace JpoApi
         public readonly int e_ZIPFILE = 0x00000010;
         public readonly int e_CACHE = 0x00000020;
         public readonly int e_ACCOUNT = 0x00000040;
-        public string m_json { get; set; }
+        public string m_response { get; set; }
         public string m_zipFile { get; set; }
-        //public string m_jsonFile { get; set; }
+        //public string m_responseFile { get; set; }
         public string m_extractPath { get; set; }
         public IEnumerable<string> m_files { get; set; }
         //public CResult m_cache_result { get; set; }     // APIキャッシュの結果
@@ -63,7 +64,7 @@ namespace JpoApi
                 if (a_access_token.Length == 0)
                 {
                     this.m_error = this.e_ACCOUNT;
-                    this.m_json = "";
+                    this.m_response = "";
                     this.m_extractPath = "";
                     this.m_zipFile = null;
                     this.m_files = new List<string>();
@@ -76,10 +77,10 @@ namespace JpoApi
                 using (CacheDocCont docCont = new CacheDocCont(a_access_token))
                 {
                     docCont.GetZipXml("api/trademark/v1/app_doc_cont_refusal_reason/" + applicationNumber);
-                    if (docCont.m_json.Length != 0)
+                    if (docCont.m_response.Length != 0)
                     {
-                        this.m_json = docCont.m_json;
-                        CJpo cjpo = JsonConvert.DeserializeObject<CJpo>(this.m_json);
+                        this.m_response = docCont.m_response;
+                        CJpo cjpo = JsonConvert.DeserializeObject<CJpo>(this.m_response);
                         this.m_result = cjpo.result;
                         this.m_error = docCont.m_error;
                     }
@@ -96,7 +97,18 @@ namespace JpoApi
                 ;
             }
         }
+        public string documentNumber(string filePath)
+        {
+            string[] dirs = filePath.Split('\\');
 
+            Regex rx0 = new Regex(@"([0-9]{11,11})", RegexOptions.None);
+            Match w_match0 = rx0.Match(dirs[dirs.Length - 1]);
+            if (w_match0.Success)
+            {
+                return w_match0.Groups[1].Value;
+            }
+            return "";
+        }
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)

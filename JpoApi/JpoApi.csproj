@@ -60,6 +60,7 @@
     <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Management.Automation.dll.10.0.10586.0\lib\net40\System.Management.Automation.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -83,6 +84,12 @@
     <Compile Include="design\DesignJppFixedAddress.cs" />
     <Compile Include="design\DesignPriorityRightAppInfo.cs" />
     <Compile Include="design\DesignRegistrationInfo.cs" />
+    <Compile Include="opdapi\patent\OpdFamily.cs" />
+    <Compile Include="opdapi\patent\OpdFamilyList.cs" />
+    <Compile Include="opdapi\patent\OpdGlobalCiteClass.cs" />
+    <Compile Include="opdapi\patent\OpdGlobalDocCont.cs" />
+    <Compile Include="opdapi\patent\OpdGlobalDocList.cs" />
+    <Compile Include="opdapi\patent\OpdJpDocCont.cs" />
     <Compile Include="patent\AppDocContOpinionAmendment.cs" />
     <Compile Include="patent\AppDocContRefusalReason.cs" />
     <Compile Include="patent\AppDocContRefusalReasonDecision.cs" />
@@ -123,6 +130,17 @@
     <Compile Include="trademark\TrademarkJppFixedAddress.cs" />
     <Compile Include="trademark\TrademarkPriorityRightAppInfo.cs" />
     <Compile Include="trademark\TrademarkRegistrationInfo.cs" />
+    <Compile Include="Xml\Abstract.cs" />
+    <Compile Include="Xml\ApplicationBody.cs" />
+    <Compile Include="Xml\Claims.cs" />
+    <Compile Include="Xml\Description.cs" />
+    <Compile Include="Xml\DocCont.cs" />
+    <Compile Include="Xml\DocContOA.cs" />
+    <Compile Include="Xml\Drawings.cs" />
+    <Compile Include="Xml\PatAmnd.cs" />
+    <Compile Include="Xml\PatAppDoc.cs" />
+    <Compile Include="Xml\PatRspns.cs" />
+    <Compile Include="Xml\Text2html.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
